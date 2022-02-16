@@ -1,0 +1,135 @@
+---
+title: "Untitled"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+```
+
+
+
+
+```{r warning=TRUE}
+cpi <- read.csv("CPIAUCSL.csv")
+
+p <- ggplot(cpi, aes(x=as.Date(DATE), y=CPIAUCSL)) +
+  geom_line()+labs(y="CPI for All Urban Consumers:All items US Avg",x="Date")+scale_x_date(limit=c(as.Date("1990-01-01"),as.Date("2021-11-01")))
+
+p
+
+
+  
+
+```
+
+
+
+```{r}
+palu <- read.csv("PALUMUSDM.csv")
+
+p <- ggplot(cpi, aes(x=as.Date(DATE), y=PALUMUSDM)) +
+  geom_line()+labs(y="Global price of Aluminum ",x="Date")
+
+p
+
+
+  
+
+```
+
+
+
+
+
+
+```{r}
+maiz <- read.csv("PMAIZMTUSDM.csv")
+
+p <- ggplot(cpi, aes(x=as.Date(DATE), y=PMAIZMTUSDM)) +
+  geom_line()+labs(y="Global price of Corn",x="Date")
+
+p
+
+adf.test(maiz$PMAIZMTUSDM,k=1)
+
+  
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+cpi <- read.csv("POILBREUSDM.csv")
+
+p <- ggplot(cpi, aes(x=as.Date(DATE), y=POILBREUSDM)) +
+  geom_line()+labs(y="Global price of Brent Crude",x="Date")
+
+p
+
+
+  
+
+```
+
+
+```{r}
+wheat <- read.csv("PWHEAMTUSDM.csv")
+
+p <- ggplot(wheat, aes(x=as.Date(DATE), y=log(PWHEAMTUSDM))) +
+  geom_line()+labs(y="Global price of wHEAT",x="Date")
+
+
+p
+
+adf.test(wheat$PWHEAMTUSDM)
+
+  
+
+```
+
+
+
+
+```{r}
+btc <- read.csv("BTC-USD.csv")
+
+z <- ggplot(btc, aes(x=as.Date(Date), y=Close)) +
+  geom_line()+labs(y="P of BTC",x="Date")+ scale_x_date(NULL, date_labels = "%Y")
+
+z
+
+adf.test(btc$Close)
+```
+
+
+
+
+
+
+
+
+```{r}
+GDP <-read.csv("GDP.csv")
+
+
+head(GDP)
+
+
+adf.test(GDP$GDP,k=1)
+```
+
+
+
+
+
+

@@ -1,0 +1,339 @@
+---
+title: "Cryptocurrencies"
+author: "Henrique Magalhaes Rio"
+date: "1/27/2022"
+output:
+  word_document: default
+  pdf_document: default
+header-includes: \usepackage{amsmath} \usepackage{bm}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+set.seed(2022)
+```
+
+# Introduction
+
+For my project I decided to analyze Crypto currencies, and for that I choose 6 different coins which are Bitcoin, Ethereum, Litecoin, Cardano, Monero, and Waves, this choice of coins was mostly due to the data available as the Crypto market is new and so are some of the coins, also, I made sure to have balance between a few more established coins such as Bitcoin and Ethereum while the others are still new and have not yet fully been established.I got the data from Yahoo Finance, and it includes a range from 221 to 385 weekly observations depending on the coin, for my project I intend to use closing price of the week, however, the data also included opening, high and low price of the week and volume of trades for the week. Daily data was also available, however, cryptocurrencies are extremely volatile which caused daily data to be quite noisy, which is why I choose weekly data despite lowering the number of observations.
+
+
+# Bitcoin
+
+
+Bitcoin is the first "digital" currency and it was from Bitcoin that the term crypto currency originated, today it is still the most popular and expensive crypto currency. From the graph, we can see that it's price began rapidly increasing on 01-2017, which also marks when Bitcoin became popular. From 01-2018 the price starts to rapidly decreasing getting almost to the pre-2017 levels, then the price keeps oscillating around the $,000 USD mark up until the beginning of 2021 which causes it spike up again. Bitcoin shows quite a lot of volatility where investors may have a lot of gains which can be entirely erased in the next few months.
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE}
+
+btc <- read.csv("BTC-USD.csv")
+
+z <- ggplot(btc) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Bitcoin Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ",subtitle="Number of Observations= 385")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+
+
+
+```
+
+
+
+
+
+
+
+```{r,warning=FALSE,echo=FALSE}
+btc2 <- btc %>% mutate(diffe = log(Close)-log(lag(Close)))
+dif1 <- ggplot(btc2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference",x="Date")+
+  scale_x_date(date_labels = "%y",)
+
+```
+
+
+
+
+# Cardano
+
+
+Cardano is one of the new generation coins it entered the market on 2017, and it got relatively popular around the end of 2017 as we can see by the spike in the price. In 2018, it pretty much erased its gains from the peak in popularity of  2017, it stayed around the same level for about 2 years then it began rising again in 2021 where it peaked close to $3 USD where it seems to have returned to a new price level at around $1 USD.
+
+
+```{r echo=FALSE, fig.height=6, warning=FALSE}
+ada<- read.csv("ADA-USD.csv")
+
+
+z <- ggplot(ada) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Cardano Price",x="Date(Month-Year)",title ="Closing Price of Cardano (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+```
+
+
+
+
+
+
+
+```{r,warning=FALSE,echo=FALSE}
+ada2 <- ada %>% mutate(diffe = log(Close)-log(lag(Close)))
+dif2<- ggplot(ada2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference",x="Date")+
+   scale_x_date(date_labels = "%y",)
+
+```
+
+
+# Waves
+
+Waves is one of the newer Crypto currencys out there, it was relased in June of 2016, but the price data avalaible begins only in october of 2017, hence why it seems that it begins in a peak, which continues up until the end of 2018 when it start going into a period of heavy volatility which continues until the end of 2020 in which a long fast upward trend started which caused it to peak at around $35 USD, where it then began erasing the gains of the peak.
+
+
+```{r,echo=FALSE,warning=FALSE}
+wave <- read.csv("WAVES-USD.csv")
+
+
+z <- ggplot(wave) +
+  geom_line(aes(x=as.Date(Date), y=as.numeric(Close)))+labs(y="Waves Price",x="Date(Month-Year)",title ="Closing Price of Waves (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+```
+
+
+```{r,warning=FALSE,echo=FALSE}
+wave2 <- wave %>% mutate(diffe = log(as.numeric(Close))-log(lag(as.numeric(Close))))
+dif3 <- ggplot(wave2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Diference",x="Date")+
+  scale_x_date(date_labels = "%y",)
+
+```
+
+
+
+# Ethereum
+
+Ethereum is a more mature crypto currency second only to Bitcoin in terms of price, we can see that it has a small peak around 2018 and another where it then oscillates around $400 USD up until the beginning of 2021 where it starts a period of extreme volatility as we see a lot of peaks that are followed by a big drop in price.
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
+eth <- read.csv("ETH-USD.csv")
+
+
+z <- ggplot(eth) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Ethereum Price",x="Date(Month-Year)",title ="Closing Price of Ethereum (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+
+```{r,warning=FALSE,echo=FALSE,warning=FALSE}
+eth2 <- eth %>% mutate(diffe = log(as.numeric(Close))-log(lag(as.numeric(Close))))
+dif4 <- ggplot(eth2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference ",x="Date")+ scale_x_date(date_labels = "%y",)
+
+```
+
+
+# Litecoin
+
+Released only 2 years after Bitcoin, Litecoin stayed under the radar for quite awhile until the Crypto boom that happened in 2018 which caused it's price to peak at 320 USD, however, it didn't hold for long as the peak was followed by a abrupt decrease without returning to the pre-2018 level. Litecoin went through a period with a lot of volatility with small peaks up until 01-2021 where it reached a new all time high at almost $400 USD, followed by a sharp decrease that it is still happening in the end of the data.
+
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
+ltc <- read.csv("LTC-USD.csv")
+
+
+z <- ggplot(ltc) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Litecoin Price",x="Date(Month-Year)",title ="Closing Price of Litecoin (Weekly) ",subtitle="Number of Observations= 385")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+```{r,warning=FALSE,echo=FALSE}
+ltc2 <- ltc %>% mutate(diffe = log(as.numeric(Close))-log(lag(as.numeric(Close))))
+dif5 <- ggplot(ltc2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference ",x="Date")+
+   scale_x_date(date_labels = "%y",)
+
+```
+
+
+# Monero
+
+
+Monero is another new generation of coins and the data starts at the end of 2017 which is right before it's first peak price which is at $450 USD, after the peak it rapidly decreases and goes on period of heavy volatility that continutes until it peaks again in april of 2021, which again is followed by a period of high volatility that continues until the end of the available data.
+
+
+
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE}
+xmr <- read.csv("XMR-USD.csv")
+
+
+z <- ggplot(xmr) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Price in $USD",x="Date(Month-Year)",title ="Closing Price of Monero (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+
+```{r,warning=FALSE,echo=FALSE}
+xmr2 <- xmr %>% mutate(diffe = log(as.numeric(Close))-log(lag(as.numeric(Close))))
+dif6 <- ggplot(xmr2) +
+  geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference",x="Date")+
+  scale_x_date(date_labels = "%y",)
+
+```
+
+
+# Log Plot
+
+Below is the plot of all of the crypto currencies prices, I used a log so I could make the scale easier to due to the difference of prices. We can see that they follow a similar pattern however, there is a difference in the size of the increases and drops, this likely due to the competitiveness of the market with the example of Litecoin and Monero in which the switch around quite a few times in terms of price.
+
+
+```{r echo=FALSE, fig.height=6, warning=FALSE,echo=FALSE}
+
+colors <- c("Cardano" = "blue", "Bitcoin" = "red", "Waves" = "orange","Ethereum"="cyan","Litecoin"="green","Monero"="black")
+plot<-ggplot()+geom_line(aes(x=as.Date(btc$Date),y=log(btc$Close),color="Bitcoin"))+
+  geom_line(aes(x=as.Date(eth$Date),y=log(eth$Close),color="Ethereum"))+
+  geom_line(aes(x=as.Date(ada$Date),y=log(ada$Close),color="Cardano"))+
+  scale_color_manual(values = colors)+
+  geom_line(aes(x=as.Date(wave$Date),y=log(as.numeric(wave$Close)),color="Waves"))+
+  geom_line(aes(x=as.Date(ltc$Date),y=log(ltc$Close),color="Litecoin"))+
+  geom_line(aes(x=as.Date(xmr$Date),y=log(xmr$Close),color="Monero"))+
+  labs(x="Date",y="Log(Price)",title="Weekly Closing Log of Price of Cryptocurrencies")+
+   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15), limits = as.Date(c('2017-11-06','2022-01-24')))
+plot
+```
+
+
+
+# Log differences Plot
+
+In the log differences Plot below we can see even more of the volatility that the Crypto currencies face also, it makes it easier to see the differences in variation between the coins which are not as evident from the regular closing price plots, as we see  different peaks and drops between different currencies.
+
+```{r warning=FALSE,fig.height=8,fig.width=6,echo=FALSE}
+figure <-ggarrange(dif1,dif2,dif3,dif4,dif5,dif6,ncol = 2,nrow=3,labels = c("Bitcoin", "Cardano", "Waves","Ethereum","Litcoin","Monero"),hjust =-2)
+
+
+annotate_figure(figure,
+                top = text_grob(" First Log Difference Plot", color = "red", face = "bold", size = 14))
+```
+
+
+## Augumented Dickey-Fuller test for Bitcoin
+
+-Closing price test
+
+```{r,echo=FALSE}
+adf.test(btc$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+
+btc2 <- na.omit(btc2) 
+adf.test(btc2$diffe)
+```
+
+
+## Augumented Dickey-Fuller test for ADA
+
+-Closing price test
+
+```{r,echo=FALSE}
+adf.test(ada$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+ada2 <- na.omit(ada2)
+adf.test(ada2$diffe)
+```
+
+
+
+## Augumented Dickey-Fuller test for Waves
+
+-Closing price test
+
+```{r,echo=FALSE}
+adf.test(wave$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+wave2 <- na.omit(wave2)
+adf.test(wave2$diffe)
+```
+
+
+
+
+## Augumented Dickey-Fuller test for Ethereum
+
+-Closing price test
+
+```{r,echo=FALSE}
+adf.test(eth$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+eth2 <- na.omit(eth2)
+adf.test(eth2$diffe)
+```
+
+
+
+## Augumented Dickey-Fuller test for Litecoin
+
+-Closing price test
+
+```{r,echo=FALSE}
+adf.test(ltc$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+ltc2 <- na.omit(ltc2)
+adf.test(ltc2$diffe)
+```
+
+
+## Augumented Dickey-Fuller test for Monero
+
+-Closing price test
+
+```{r,echo=FALSE}
+xmr2 <- na.omit(xmr2)
+adf.test(xmr$Close)
+```
+
+-Log Difference of Price test
+
+```{r,echo=FALSE}
+adf.test(xmr2$diffe)
+```
+
+
+# Augumented Dickey-Fuller  Conclusion
+
+All of the crypto currencies test worked the way they were supposed with the augmented dickey-fuller test concluding that the closing price of all coins are non stationary and that the test for the log of the first difference were concluded to be stationary.
+
