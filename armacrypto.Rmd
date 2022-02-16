@@ -1,0 +1,20 @@
+---
+title: "armacrypto"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+library(forecast)
+set.seed(2022)
+```
+
+
+
+```{r}
+ggAcf(btc2$diffe,type = "correlation")+labs(title = "bitcoin")
+ggAcf(ada2$diffe,type = "correlation")+labs(title = "Cardano")
+```
