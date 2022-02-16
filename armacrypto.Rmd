@@ -15,6 +15,31 @@ set.seed(2022)
 
 
 ```{r}
-ggAcf(btc2$diffe,type = "correlation")+labs(title = "bitcoin")
+ggAcf(btc2$diffe,type = "correlation",lag.max = 50)+labs(title = "bitcoin")
 ggAcf(ada2$diffe,type = "correlation")+labs(title = "Cardano")
 ```
+
+
+
+
+```{r}
+btc_ar <- arima(btc2$diffe , order = c(1,0,5))
+
+summary(btc_ar)
+
+re<-residuals(btc_ar)
+
+
+fit <- btc2$diffe-re
+
+ts.plot(btc2$diffe)*points(fit, type = "l", col = 2, lty = 2)
+
+```
+
+```{r}
+acf(re)
+
+
+```
+
+
