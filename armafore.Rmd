@@ -113,7 +113,7 @@ Cut period from 2018-10-15 to 2021-08-30
 
 ```{r}
 
-ethcut <- eth[50:200,]
+ethcut <- eth[50:150,]
 
 ethcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
@@ -125,17 +125,17 @@ fiteth
 
 checkresiduals(fiteth)
 
-fiteth <- Arima(ethcut$Close,order=c(2,1,15))
-
-fiteth
-
-checkresiduals(fiteth)
 fiteth <- Arima(ethcut$Close,order=c(2,1,25))
 
 fiteth
 
 checkresiduals(fiteth)
 fiteth <- Arima(ethcut$Close,order=c(2,1,20))
+
+fiteth
+
+checkresiduals(fiteth)
+fiteth <- Arima(ethcut$Close,order=c(2,1,15))
 
 fiteth
 
@@ -156,7 +156,7 @@ foreeth <- forecast(fiteth,h=20)
 
 
 ```{r}
-tseth <- ts(eth$Close[50:220])
+tseth <- ts(eth$Close[50:170])
 
 autoplot(foreeth)+autolayer(tseth,series = "Data")+autolayer(foreeth$mean,series = "forecast")
 
