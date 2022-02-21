@@ -28,7 +28,13 @@ z
 
 
 
+btc$Close %>% diff() %>% ggtsdisplay(main="")
 ```
+
+
+
+
+
 
 Cut data from 2017-07-2 to 2020-01-01
 
