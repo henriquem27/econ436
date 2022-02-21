@@ -14,6 +14,21 @@ set.seed(2022)
 ```
 
 
+# Bitcoin
+
+```{r,fig.width=10, fig.height=6,echo=FALSE}
+
+btc <- read.csv("BTC-USD.csv")
+
+z <- ggplot(btc) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Bitcoin Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ",subtitle="Number of Observations= 385")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+
+
+
+```
 
 Cut data from 2017-07-2 to 2020-01-01
 
@@ -25,24 +40,33 @@ btcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
  
 ```{r}
-fit <- Arima(btcut$Close,order=c(2,1,20))
-
+fit <- Arima(btcut$Close,order=c(2,1,10))
 fit
-
-```
-
-
-```{r}
+checkresiduals(fit)
+fit <- Arima(btcut$Close,order=c(2,1,20))
+fit
+checkresiduals(fit)
+fit <- Arima(btcut$Close,order=c(1,1,5))
+fit
+checkresiduals(fit)
+fit <- Arima(btcut$Close,order=c(2,1,15))
+fit
 checkresiduals(fit)
 
-fore <- forecast(fit,h=15)
+```
+
+
+```{r}
+
+
+fore <- forecast(fit,h=20)
 
 
 ```
 
 
 ```{r}
-tsbtc <- ts(btcut <- btc$Close[150:295])
+tsbtc <- ts(btcut <- btc$Close[150:300])
 
 autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
 
@@ -53,29 +77,9 @@ autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "fo
 
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-library(tseries)
-library(ggpubr)
-library(forecast)
-library(lubridate)
-set.seed(2022)
-```
-
-```{r,fig.width=10, fig.height=6,echo=FALSE}
-
-btc <- read.csv("BTC-USD.csv")
-
-z <- ggplot(btc[1]) +
-  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Bitcoin Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ",subtitle="Number of Observations= 385")+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
-z
 
 
-
-```
+# Ethereum
 
 
 ```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
@@ -101,15 +105,35 @@ ethcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
  
 ```{r}
+fiteth <- Arima(ethcut$Close,order=c(1,1,0))
+
+fiteth
+
+checkresiduals(fiteth)
+
+fiteth <- Arima(ethcut$Close,order=c(2,1,15))
+
+fiteth
+
+checkresiduals(fiteth)
 fiteth <- Arima(ethcut$Close,order=c(2,1,25))
 
 fiteth
+
+checkresiduals(fiteth)
+fiteth <- Arima(ethcut$Close,order=c(2,1,20))
+
+fiteth
+
+checkresiduals(fiteth)
+
+
 
 ```
 
 
 ```{r}
-checkresiduals(fiteth)
+
 
 foreeth <- forecast(fiteth,h=20)
 
@@ -128,6 +152,8 @@ autoplot(foreeth)+autolayer(tseth,series = "Data")+autolayer(foreeth$mean,series
 
 
 # Monero
+
+2018-10 to 2020-10
 
 ```{r,fig.width=10, fig.height=6,echo=FALSE}
 xmr <- read.csv("XMR-USD.csv")
@@ -150,15 +176,28 @@ xmrcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
  
 ```{r}
+fitxmr <- Arima(xmrcut$Close,order=c(1,1,0))
+
+fitxmr
+checkresiduals(fitxmr)
+fitxmr <- Arima(xmrcut$Close,order=c(2,1,5))
+
+fitxmr
+checkresiduals(fitxmr)
+fitxmr <- Arima(xmrcut$Close,order=c(2,1,10))
+
+fitxmr
+checkresiduals(fitxmr)
 fitxmr <- Arima(xmrcut$Close,order=c(2,1,20))
 
 fitxmr
+checkresiduals(fitxmr)
 
 ```
 
 
 ```{r}
-checkresiduals(fitxmr)
+
 
 forexmr<- forecast(fitxmr,h=20)
 
@@ -192,7 +231,7 @@ z
 ```
 
 
-
+2017-07 to 2021-07
 
 
 ```{r}
