@@ -1,0 +1,238 @@
+---
+title: "ForecastingArma"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+library(forecast)
+library(lubridate)
+set.seed(2022)
+```
+
+
+
+Cut data from 2017-07-2 to 2020-01-01
+
+```{r}
+
+btcut <- btc[150:280,]
+
+btcut$Close %>% diff() %>% ggtsdisplay(main="")
+```
+ 
+```{r}
+fit <- Arima(btcut$Close,order=c(2,1,20))
+
+fit
+
+```
+
+
+```{r}
+checkresiduals(fit)
+
+fore <- forecast(fit,h=15)
+
+
+```
+
+
+```{r}
+tsbtc <- ts(btcut <- btc$Close[150:295])
+
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
+
+
+
+```
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+library(forecast)
+library(lubridate)
+set.seed(2022)
+```
+
+```{r,fig.width=10, fig.height=6,echo=FALSE}
+
+btc <- read.csv("BTC-USD.csv")
+
+z <- ggplot(btc[1]) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Bitcoin Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ",subtitle="Number of Observations= 385")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+
+
+
+```
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
+eth <- read.csv("ETH-USD.csv")
+
+
+z <- ggplot(eth) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Ethereum Price",x="Date(Month-Year)",title ="Closing Price of Ethereum (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+# Etherium
+Cut period from 2018-10-15 to 2021-08-30
+
+
+```{r}
+
+ethcut <- eth[50:200,]
+
+ethcut$Close %>% diff() %>% ggtsdisplay(main="")
+```
+ 
+```{r}
+fiteth <- Arima(ethcut$Close,order=c(2,1,25))
+
+fiteth
+
+```
+
+
+```{r}
+checkresiduals(fiteth)
+
+foreeth <- forecast(fiteth,h=20)
+
+
+```
+
+
+```{r}
+tseth <- ts(eth$Close[50:220])
+
+autoplot(foreeth)+autolayer(tseth,series = "Data")+autolayer(foreeth$mean,series = "forecast")
+
+
+
+```
+
+
+# Monero
+
+```{r,fig.width=10, fig.height=6,echo=FALSE}
+xmr <- read.csv("XMR-USD.csv")
+
+
+z <- ggplot(xmr) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Price in $USD",x="Date(Month-Year)",title ="Closing Price of Monero (Weekly) ",subtitle="Number of Observations= 221")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+
+
+```{r}
+
+xmrcut <- xmr[50:100,]
+
+xmrcut$Close %>% diff() %>% ggtsdisplay(main="")
+```
+ 
+```{r}
+fitxmr <- Arima(xmrcut$Close,order=c(2,1,20))
+
+fitxmr
+
+```
+
+
+```{r}
+checkresiduals(fitxmr)
+
+forexmr<- forecast(fitxmr,h=20)
+
+
+```
+
+
+```{r}
+tsxmr <- ts(xmr$Close[50:120])
+
+autoplot(forexmr)+autolayer(tsxmr,series = "Data")+autolayer(forexmr$mean,series = "forecast")
+
+
+
+```
+
+
+
+# Litecoin
+
+
+```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
+ltc <- read.csv("LTC-USD.csv")
+
+
+z <- ggplot(ltc) +
+  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Litecoin Price",x="Date(Month-Year)",title ="Closing Price of Litecoin (Weekly) ",subtitle="Number of Observations= 385")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+z
+```
+
+
+
+
+
+```{r}
+
+ltccut <- ltc[150:360,]
+
+ltccut$Close %>% diff() %>% ggtsdisplay(main="")
+```
+ 
+```{r}
+fitltc <- Arima(ltccut$Close,order=c(1,1,10))
+fitltc-
+checkresiduals(fitltc)
+fitltc <- Arima(ltccut$Close,order=c(2,1,25))
+fitltc
+checkresiduals(fitltc)
+fitltc <- Arima(ltccut$Close,order=c(2,1,5))
+fitltc
+checkresiduals(fitltc)
+fitltc <- Arima(ltccut$Close,order=c(2,1,15))
+fitltc
+checkresiduals(fitltc)
+
+```
+
+
+```{r}
+
+
+foreltc<- forecast(fitltc,h=20)
+
+
+```
+
+
+```{r}
+tsltc <- ts(ltc$Close[150:380])
+
+autoplot(foreltc)+autolayer(tsltc,series = "Data")+autolayer(foreltc$mean,series = "forecast")
+
+
+
+```

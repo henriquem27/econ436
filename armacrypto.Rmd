@@ -17,6 +17,9 @@ set.seed(2022)
 ```{r}
 ggAcf(btc2$diffe,type = "correlation",lag.max = 50)+labs(title = "bitcoin")
 ggAcf(ada2$diffe,type = "correlation")+labs(title = "Cardano")
+ggAcf(ltc2$diffe,type = "correlation",lag.max = 50)+labs(title = "bitcoin")
+ggAcf(eth2$diffe,type = "correlation")+labs(title = "Cardano")
+
 ```
 
 
