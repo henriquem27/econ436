@@ -1,6 +1,8 @@
 ---
 title: "ForecastingArma"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +15,12 @@ library(lubridate)
 set.seed(2022)
 ```
 
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>", echo = FALSE
+)
+```
 
 # Bitcoin
 
@@ -249,7 +257,7 @@ ltccut$Close %>% diff() %>% ggtsdisplay(main="")
  
 ```{r}
 fitltc <- Arima(ltccut$Close,order=c(1,1,10))
-fitltc-
+fitltc
 checkresiduals(fitltc)
 fitltc <- Arima(ltccut$Close,order=c(2,1,25))
 fitltc
