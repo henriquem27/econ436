@@ -71,7 +71,7 @@ z <- ggplot(ada) +
   geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Cardano Price",x="Date(Month-Year)",title ="Closing Price of Cardano (Weekly) ",subtitle="Number of Observations= 221")+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
 
-
+z
 ```
 
 
@@ -101,7 +101,7 @@ wave <- read.csv("WAVES-USD.csv")
 z <- ggplot(wave) +
   geom_line(aes(x=as.Date(Date), y=as.numeric(Close)))+labs(y="Waves Price",x="Date(Month-Year)",title ="Closing Price of Waves (Weekly) ",subtitle="Number of Observations= 221")+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
+z
 
 ```
 
