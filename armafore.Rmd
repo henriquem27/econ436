@@ -1,5 +1,5 @@
 ---
-title: "ForecastingArma"
+title: "Forecasting Arima"
 output:
   word_document: default
   pdf_document: default
@@ -13,6 +13,8 @@ library(ggpubr)
 library(forecast)
 library(lubridate)
 set.seed(2022)
+
+
 ```
 
 
@@ -37,6 +39,7 @@ z
 
 
 btc$Close %>% diff() %>% ggtsdisplay(main="")
+
 ```
 
 
@@ -48,13 +51,13 @@ Cut data from 2017-07-2 to 2020-01-01
 
 ```{r}
 
-btcut <- btc[150:280,]
+btcut <- btc[1:370,]
 
 btcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
  
 ```{r}
-fit <- Arima(btcut$Close,order=c(2,1,10))
+fit <- Arima(btcut$Close,order=c(2,2,10))
 fit
 checkresiduals(fit)
 fit <- Arima(btcut$Close,order=c(2,1,20))
@@ -63,7 +66,7 @@ checkresiduals(fit)
 fit <- Arima(btcut$Close,order=c(1,1,5))
 fit
 checkresiduals(fit)
-fit <- Arima(btcut$Close,order=c(2,1,15))
+fit <- Arima(btcut$Close,order=c(2,1,25))
 fit
 checkresiduals(fit)
 
@@ -80,7 +83,7 @@ fore <- forecast(fit,h=20)
 
 
 ```{r}
-tsbtc <- ts(btcut <- btc$Close[150:300])
+tsbtc <- ts(btcut <- btc$Close[1:385])
 
 autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
 
@@ -113,7 +116,7 @@ Cut period from 2018-10-15 to 2021-08-30
 
 ```{r}
 
-ethcut <- eth[50:150,]
+ethcut <- eth[1:210,]
 
 ethcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
@@ -135,7 +138,7 @@ fiteth <- Arima(ethcut$Close,order=c(2,1,20))
 fiteth
 
 checkresiduals(fiteth)
-fiteth <- Arima(ethcut$Close,order=c(2,1,15))
+fiteth <- Arima(ethcut$Close,order=c(2,1,25))
 
 fiteth
 
@@ -149,14 +152,14 @@ checkresiduals(fiteth)
 ```{r}
 
 
-foreeth <- forecast(fiteth,h=20)
+foreeth <- forecast(fiteth,h=11)
 
 
 ```
 
 
 ```{r}
-tseth <- ts(eth$Close[50:170])
+tseth <- ts(eth$Close)
 
 autoplot(foreeth)+autolayer(tseth,series = "Data")+autolayer(foreeth$mean,series = "forecast")
 
@@ -185,6 +188,8 @@ z
 ```{r}
 
 xmrcut <- xmr[50:100,]
+
+xmrcut<-xmr
 
 xmrcut$Close %>% diff() %>% ggtsdisplay(main="")
 ```
@@ -278,6 +283,45 @@ checkresiduals(fitltc)
 foreltc<- forecast(fitltc,h=20)
 
 
+```
+
+
+```{r}
+tsltc <- ts(ltc$Close[150:380])
+
+autoplot(foreltc)+autolayer(tsltc,series = "Data")+autolayer(foreltc$mean,series = "forecast")
+
+
+
+```
+
+
+LTC new
+
+
+```{r}
+
+
+
+ltc$Close %>% diff() %>% ggtsdisplay(main="")
+```
+ 
+```{r}
+
+
+fitltc <- Arima(ltc$Close,order=c(2,1,25))
+fitltc
+checkresiduals(fitltc)
+
+```
+
+
+```{r}
+
+
+foreltc<- forecast(fitltc,h=20)
+
+autoplot(foreltc)
 ```
 
 

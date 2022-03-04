@@ -52,6 +52,7 @@ dif1 <- ggplot(btc2) +
   geom_line(aes(x=as.Date(Date), y=diffe))+labs(y="Price Difference",x="Date")+
   scale_x_date(date_labels = "%y",)
 
+
 ```
 
 
