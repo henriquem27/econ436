@@ -12,50 +12,202 @@ library(tseries)
 library(ggpubr)
 library(forecast)
 library(lubridate)
+library(lmtest)
 set.seed(2022)
-
 
 ```
 
 
-```{r, include=FALSE}
+# Introduction
+
+In this paper I will analyze and forecast 4 different crypto currencies using ARIMA, For the currencies I choose Bitcoin, Ethereum, Cardano, and Waves. This choice was made as with these 4 crypto currencies I have 2 mainstream ones that have their price in the thousands of USD, and 2 coins that are still on the rise and have a much lower price. The reason for the split between the two types of crypto currencies is that I would like to see if the market for crypto currencies behave the same way for the more mainstream coins and for the cheaper less known, in essence if the models used to estimate Bitcoin and Ethereum are similar or not to those used to forecast Cardano and Waves.
+
+
+
+```{r data loading, include=FALSE}
 knitr::opts_chunk$set(
   comment = "#>", echo = FALSE
 )
-```
+data <- read.csv("CLOSINGPRICEDATA.csv")
 
-# Bitcoin
-
-```{r,fig.width=10, fig.height=6,echo=FALSE}
-
-btc <- read.csv("BTC-USD.csv")
-
-z <- ggplot(btc) +
-  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Bitcoin Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ",subtitle="Number of Observations= 385")+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
-z
+data$Date <-mdy(data$Date)
 
 
+datadif <-data  %>% mutate(difbtc = data$BTC - lag(data$BTC))
 
-btc$Close %>% diff() %>% ggtsdisplay(main="")
+datadif <-datadif %>% mutate(difada = data$ADA - lag(data$ADA))
+
+datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
+
+datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
 
 ```
 
 
+# Series and First difference Plots
+
+```{r Series plot, message=FALSE, warning=FALSE,echo=FALSE}
+
+#level Plot
+
+btc <- ggplot(data) +
+  geom_line(aes(x=Date, y=BTC))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+
+ADA <- ggplot(data) +
+  geom_line(aes(x=Date, y=ADA))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Cardano (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+
+WAVE <- ggplot(data) +
+  geom_line(aes(x=Date, y=WAVES))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of WAVES (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
 
 
 
 
-Cut data from 2017-07-2 to 2020-01-01
+ETH <- ggplot(data) +
+  geom_line(aes(x=Date, y=ETH))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Ethereum (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+ggarrange(btc,ETH,ADA,WAVE)
+
+# 1st dif
+
+btc <- ggplot(datadif) +
+  geom_line(aes(x=Date, y=difbtc))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Bitcoin (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+
+ADA <- ggplot(datadif) +
+  geom_line(aes(x=Date, y=difada))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Cardano (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+
+WAVE <- ggplot(datadif) +
+  geom_line(aes(x=Date, y=difwave))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of WAVES (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+
+
+ETH <- ggplot(datadif) +
+  geom_line(aes(x=Date, y=difeth))+labs(y="Price",x="Date(Month-Year)",title ="Closing Price of Ethereum (Weekly) ")+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 10))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
+
+
+ggarrange(btc,ETH,ADA,WAVE)
+
+
+
+
+#data$BTC %>% diff() %>% ggtsdisplay(main="")
+
+```
+
+
+Looking at the series I have decided to cut data at 2019-09-30, which seems to represent a new "trend" in all crypto currencies as they ascend to new peaks, but it is also followed by a lot more variation when compared to the previous period. Therefore, I believe by splitting the data it allows me to check whether this period actually represent a new "trend" in the history of crypto and if this means that a different model is required in order to forecast these different periods. 
+
+
+
+# Steps for Forecasting
+
+The First step for forecasting is looking at the Auto Correlation Function (ACF), as we are looking for potential significant correlations on the lags that can be used for forecasting, if there is a significance it means that we can use the significant lag in order to forecast on the next period of the series. Once we find the lags with statistical significance we can then estimate the ARIMA model, and verify the significance of the coefficients. Next we have to check the residual correlelogram to make sure none of the lag coefficients are significant since that would mean that the errors are not white noise, and therefore, the model we have used is still missing lags that are unaccounted for which must be added for the model.
+
+# Model Estimation
+
+## Bitcoin
+
+
+```{r btc, echo=FALSE}
+
+data1 <- data[1:100,]
+data2 <- data[100:210,]
+data1$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 1")
+data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2")
+
+
+
+```
+ 
+```{r}
+fit <- Arima(data1$BTC,order=c(2,1,3),fixed=c(0,NA,0,0,NA))
+fit
+
+coeftest(fit)
+
+fit2 <- Arima(data2$BTC,order=c(1,1,2))
+fit2
+
+```
+
+
+```{r}
+fore <- forecast(fit,h=11)
+fore2 <- forecast(fit2,h=11)
+```
+
 
 ```{r}
 
-btcut <- btc[1:370,]
+tsbtc <- ts(data$BTC[1:111])
 
-btcut$Close %>% diff() %>% ggtsdisplay(main="")
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
+
+tsbtc <- ts(data$BTC[100:221])
+
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")
+
+
+
 ```
- 
+
+
+## Etherium
+
+```{r eth, echo=FALSE}
+data1$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 1")
+data2$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 2")
+
+
+
+```
+
+## Cardano
+
+```{r ada,echo=FALSE}
+data1$ADA %>% diff() %>% ggtsdisplay(main="ADA Period 1")
+data2$ADA %>% diff() %>% ggtsdisplay(main="ADA Period 2")
+```
+
+
+
+## Waves 
+```{r wave,echo=FALSE}
+data1$WAVES %>% diff() %>% ggtsdisplay(main="Waves Period 1")
+data2$WAVES %>% diff() %>% ggtsdisplay(main="Waves Period 2")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r}
 fit <- Arima(btcut$Close,order=c(2,2,10))
 fit
