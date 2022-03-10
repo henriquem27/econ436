@@ -112,7 +112,7 @@ ggarrange(btc,ETH,ADA,WAVE)
 ```
 
 
-Looking at the series I have decided to cut data at 2019-09-30, which seems to represent a new "trend" in all crypto currencies as they ascend to new peaks, but it is also followed by a lot more variation when compared to the previous period. Therefore, I believe by splitting the data it allows me to check whether this period actually represent a new "trend" in the history of crypto and if this means that a different model is required in order to forecast these different periods. 
+Looking at the series I have decided to cut data at 2019-09-30, which I did in order to try and split some of the volatility of crypto in between 2 periods, so that it does not 
 
 
 
