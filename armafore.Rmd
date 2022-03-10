@@ -112,7 +112,7 @@ ggarrange(btc,ETH,ADA,WAVE)
 ```
 
 
-Looking at the series I have decided to cut data at 2019-09-30, which I did in order to try and split some of the volatility of crypto in between 2 periods, so that it does not 
+Looking at the plots I have decided to cut data at 2019-09-30. The reasoning behind this choice was that the crypto currencies have a period of high volatility in the beginning of the series, they then go through a period of "stability" the lasts up until the beginning of 2021. Hence, but making this I can have forcasting models that work for both periods.
 
 
 
@@ -120,7 +120,9 @@ Looking at the series I have decided to cut data at 2019-09-30, which I did in o
 
 The First step for forecasting is looking at the Auto Correlation Function (ACF), as we are looking for potential significant correlations on the lags that can be used for forecasting, if there is a significance it means that we can use the significant lag in order to forecast on the next period of the series. Once we find the lags with statistical significance we can then estimate the ARIMA model, and verify the significance of the coefficients. Next we have to check the residual correlelogram to make sure none of the lag coefficients are significant since that would mean that the errors are not white noise, and therefore, the model we have used is still missing lags that are unaccounted for which must be added for the model.
 
+
 # Model Estimation
+
 
 ## Bitcoin
 
@@ -129,24 +131,39 @@ The First step for forecasting is looking at the Auto Correlation Function (ACF)
 
 data1 <- data[1:100,]
 data2 <- data[100:210,]
-data1$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 1")
-data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2")
+data1$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 1 - 2017-11-06 to 2019-09-30
+")
+data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2 - 2019-09-30 to 2021-11-15
+
+ ")
 
 
 
 ```
+ Looking at the ACF for Bitcoin in period 1 there seems to be significant spike at lag 3, while in period 2 it seems to be a significant spike at period 2, 4, 8, 15, also period 2 seems to have AR(2) process involved as it seems to alternate between positive and negative correlations of lags that seems to be decreasing over time.
+ 
  
 ```{r}
-fit <- Arima(data1$BTC,order=c(2,1,3),fixed=c(0,NA,0,0,NA))
+fit <- Arima(data1$BTC,order=c(0,1,11),fixed=c(0,0,NA,0,0,0,0,0,0,0,NA))
 fit
 
 coeftest(fit)
 
-fit2 <- Arima(data2$BTC,order=c(1,1,2))
-fit2
+checkresiduals(fit)
+
 
 ```
+For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model and checking the residuals afterwards everything is white noise and both coefficients are statiscially significant.
 
+
+```{r}
+fit2 <- Arima(data2$BTC,order=c(0,1,15),fixed=c(0,0,0,0,0,0,0,NA,0,0,0,0,0,0,NA))
+fit2
+
+coeftest(fit2)
+checkresiduals(fit2)
+```
+For the second period of the Bitcoin series,  I used a MA8 and MA15 for forecasting the model, initially I used the moving averages 2,4,8 and 15 but the coefficients for the MA2 and MA4 were not statistically significant, therefore, I have removed it.
 
 ```{r}
 fore <- forecast(fit,h=11)
@@ -158,7 +175,7 @@ fore2 <- forecast(fit2,h=11)
 
 tsbtc <- ts(data$BTC[1:111])
 
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forcasting for bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11")
 
 tsbtc <- ts(data$BTC[100:221])
 
