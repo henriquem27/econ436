@@ -153,7 +153,7 @@ checkresiduals(fit)
 
 
 ```
-For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model and checking the residuals afterwards everything is white noise and both coefficients are statiscially significant.
+For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model and checking the residuals afterwards everything is white noise and both coefficients are statistically significant.
 
 
 ```{r}
@@ -163,7 +163,7 @@ fit2
 coeftest(fit2)
 checkresiduals(fit2)
 ```
-For the second period of the Bitcoin series,  I used a MA8 and MA15 for forecasting the model, initially I used the moving averages 2,4,8 and 15 but the coefficients for the MA2 and MA4 were not statistically significant, therefore, I have removed it.
+For the second period of the Bitcoin series,  I used a MA8 and MA15 for forecasting the model, initially I used the moving averages 2,4,8 and 15 but the coefficients for the MA2 and MA4 were not statistically significant, therefore, I removed both coefficients and so the final model includes only MA8 and MA15 which are both statistically significant.
 
 ```{r}
 fore <- forecast(fit,h=11)
@@ -175,12 +175,11 @@ fore2 <- forecast(fit2,h=11)
 
 tsbtc <- ts(data$BTC[1:111])
 
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forcasting for bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11")
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
 
 tsbtc <- ts(data$BTC[100:221])
 
 autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")
-
 
 
 ```
@@ -189,7 +188,9 @@ autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "
 ## Etherium
 
 ```{r eth, echo=FALSE}
+
 data1$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 1")
+
 data2$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 2")
 
 
