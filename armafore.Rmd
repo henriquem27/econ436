@@ -1,5 +1,6 @@
 ---
-title: "Forecasting Arima"
+title: "Crypto Currencies Forecasting"
+author: "Henrique Magalhaes Rio"
 output:
   word_document: default
   pdf_document: default
@@ -127,6 +128,9 @@ The First step for forecasting is looking at the Auto Correlation Function (ACF)
 ## Bitcoin
 
 
+### ACF for Bitcoin
+
+
 ```{r btc, echo=FALSE}
 
 data1 <- data[1:100,]
@@ -143,7 +147,9 @@ data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2 - 2019-09-30 to 2021
  Looking at the ACF for Bitcoin in period 1 there seems to be significant spike at lag 3, while in period 2 it seems to be a significant spike at period 2, 4, 8, 15, also period 2 seems to have AR(2) process involved as it seems to alternate between positive and negative correlations of lags that seems to be decreasing over time.
  
  
-```{r}
+### Model Estimation for Bitcoin 
+ 
+```{r,echo=FALSE}
 fit <- Arima(data1$BTC,order=c(0,1,11),fixed=c(0,0,NA,0,0,0,0,0,0,0,NA))
 fit
 
@@ -153,46 +159,98 @@ checkresiduals(fit)
 
 
 ```
-For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model and checking the residuals afterwards everything is white noise and both coefficients are statistically significant.
+  For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model. Checking the residuals afterwards everything is white noise and both coefficients are statistically significant.
 
 
-```{r}
+```{r,echo=FALSE}
 fit2 <- Arima(data2$BTC,order=c(0,1,15),fixed=c(0,0,0,0,0,0,0,NA,0,0,0,0,0,0,NA))
 fit2
+
+
+
 
 coeftest(fit2)
 checkresiduals(fit2)
 ```
 For the second period of the Bitcoin series,  I used a MA8 and MA15 for forecasting the model, initially I used the moving averages 2,4,8 and 15 but the coefficients for the MA2 and MA4 were not statistically significant, therefore, I removed both coefficients and so the final model includes only MA8 and MA15 which are both statistically significant.
 
-```{r}
+```{r,echo=FALSE}
 fore <- forecast(fit,h=11)
 fore2 <- forecast(fit2,h=11)
 ```
 
 
-```{r}
+### Forecast for Bitcoin
+
+```{r,echo=FALSE}
 
 tsbtc <- ts(data$BTC[1:111])
 
 autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
 
+
+```
+
+For the first period we can see above that forecast for the next 11 weeks follows pretty close to the actual data, as they both portray a downward trend on the price of Bitcoin. Meanwhile, for the second period of choice the forecast completely misses the downward shift for Bitcoin for the first few weeks, and only begins to portray afterwards and the actual intensity of the price drop of Bitcoin is still much larger than the actual data.
+
+
+
+```{r}
 tsbtc <- ts(data$BTC[100:221])
 
-autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 2",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
+
+```
+
+## Ethereum
+
+### ACF for Ethereum
+
+```{r eth, echo=FALSE}
+
+data1$ETH %>% diff() %>% ggtsdisplay(main="Ethereum Period 1")
+
+data2$ETH %>% diff() %>% ggtsdisplay(main="Ethereum Period 2")
+
 
 
 ```
 
 
-## Etherium
+Looking at the ACF for Ethereum we can see that for the first period there is only one spike at lag 4. Meanwhile, for the second period, there seems to be several spikes at lag 2,4,6,7,10,12,14, and 17, which is quite different from the first period.
 
-```{r eth, echo=FALSE}
+### Model Estimation for Ethereum
 
-data1$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 1")
+```{r}
 
-data2$ETH %>% diff() %>% ggtsdisplay(main="ETH Period 2")
+fit <- Arima(data1$ETH,order=c(0,1,4),fixed=c(0,0,NA,NA))
+fit
 
+coeftest(fit)
+
+checkresiduals(fit)
+
+
+
+```
+
+
+
+### Forecasts for Ethereum
+
+
+
+```{r,echo=FALSE}
+fore <- forecast(fit,h=11)
+fore2 <- forecast(fit2,h=11)
+```
+
+
+```{r,echo=FALSE}
+
+tsbtc <- ts(data$ETH[1:111])
+
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Ethereum period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
 
 
 ```
@@ -226,280 +284,7 @@ data2$WAVES %>% diff() %>% ggtsdisplay(main="Waves Period 2")
 
 
 
-```{r}
-fit <- Arima(btcut$Close,order=c(2,2,10))
-fit
-checkresiduals(fit)
-fit <- Arima(btcut$Close,order=c(2,1,20))
-fit
-checkresiduals(fit)
-fit <- Arima(btcut$Close,order=c(1,1,5))
-fit
-checkresiduals(fit)
-fit <- Arima(btcut$Close,order=c(2,1,25))
-fit
-checkresiduals(fit)
 
-```
 
 
-```{r}
 
-
-fore <- forecast(fit,h=20)
-
-
-```
-
-
-```{r}
-tsbtc <- ts(btcut <- btc$Close[1:385])
-
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")
-
-
-
-```
-
-
-
-
-
-
-# Ethereum
-
-
-```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
-eth <- read.csv("ETH-USD.csv")
-
-
-z <- ggplot(eth) +
-  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Ethereum Price",x="Date(Month-Year)",title ="Closing Price of Ethereum (Weekly) ",subtitle="Number of Observations= 221")+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
-z
-```
-
-# Etherium
-Cut period from 2018-10-15 to 2021-08-30
-
-
-```{r}
-
-ethcut <- eth[1:210,]
-
-ethcut$Close %>% diff() %>% ggtsdisplay(main="")
-```
- 
-```{r}
-fiteth <- Arima(ethcut$Close,order=c(1,1,0))
-
-fiteth
-
-checkresiduals(fiteth)
-
-fiteth <- Arima(ethcut$Close,order=c(2,1,25))
-
-fiteth
-
-checkresiduals(fiteth)
-fiteth <- Arima(ethcut$Close,order=c(2,1,20))
-
-fiteth
-
-checkresiduals(fiteth)
-fiteth <- Arima(ethcut$Close,order=c(2,1,25))
-
-fiteth
-
-checkresiduals(fiteth)
-
-
-
-```
-
-
-```{r}
-
-
-foreeth <- forecast(fiteth,h=11)
-
-
-```
-
-
-```{r}
-tseth <- ts(eth$Close)
-
-autoplot(foreeth)+autolayer(tseth,series = "Data")+autolayer(foreeth$mean,series = "forecast")
-
-
-
-```
-
-
-# Monero
-
-2018-10 to 2020-10
-
-```{r,fig.width=10, fig.height=6,echo=FALSE}
-xmr <- read.csv("XMR-USD.csv")
-
-
-z <- ggplot(xmr) +
-  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Price in $USD",x="Date(Month-Year)",title ="Closing Price of Monero (Weekly) ",subtitle="Number of Observations= 221")+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
-z
-```
-
-
-
-```{r}
-
-xmrcut <- xmr[50:100,]
-
-xmrcut<-xmr
-
-xmrcut$Close %>% diff() %>% ggtsdisplay(main="")
-```
- 
-```{r}
-fitxmr <- Arima(xmrcut$Close,order=c(1,1,0))
-
-fitxmr
-checkresiduals(fitxmr)
-fitxmr <- Arima(xmrcut$Close,order=c(2,1,5))
-
-fitxmr
-checkresiduals(fitxmr)
-fitxmr <- Arima(xmrcut$Close,order=c(2,1,10))
-
-fitxmr
-checkresiduals(fitxmr)
-fitxmr <- Arima(xmrcut$Close,order=c(2,1,20))
-
-fitxmr
-checkresiduals(fitxmr)
-
-```
-
-
-```{r}
-
-
-forexmr<- forecast(fitxmr,h=20)
-
-
-```
-
-
-```{r}
-tsxmr <- ts(xmr$Close[50:120])
-
-autoplot(forexmr)+autolayer(tsxmr,series = "Data")+autolayer(forexmr$mean,series = "forecast")
-
-
-
-```
-
-
-
-# Litecoin
-
-
-```{r,fig.width=10, fig.height=6,echo=FALSE,warning=FALSE}
-ltc <- read.csv("LTC-USD.csv")
-
-
-z <- ggplot(ltc) +
-  geom_line(aes(x=as.Date(Date), y=Close))+labs(y="Litecoin Price",x="Date(Month-Year)",title ="Closing Price of Litecoin (Weekly) ",subtitle="Number of Observations= 385")+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+scale_y_continuous(labels=scales::dollar_format(),breaks = scales::pretty_breaks(n = 10))
-
-z
-```
-
-
-2017-07 to 2021-07
-
-
-```{r}
-
-ltccut <- ltc[150:360,]
-
-ltccut$Close %>% diff() %>% ggtsdisplay(main="")
-```
- 
-```{r}
-fitltc <- Arima(ltccut$Close,order=c(1,1,10))
-fitltc
-checkresiduals(fitltc)
-fitltc <- Arima(ltccut$Close,order=c(2,1,25))
-fitltc
-checkresiduals(fitltc)
-fitltc <- Arima(ltccut$Close,order=c(2,1,5))
-fitltc
-checkresiduals(fitltc)
-fitltc <- Arima(ltccut$Close,order=c(2,1,15))
-fitltc
-checkresiduals(fitltc)
-
-```
-
-
-```{r}
-
-
-foreltc<- forecast(fitltc,h=20)
-
-
-```
-
-
-```{r}
-tsltc <- ts(ltc$Close[150:380])
-
-autoplot(foreltc)+autolayer(tsltc,series = "Data")+autolayer(foreltc$mean,series = "forecast")
-
-
-
-```
-
-
-LTC new
-
-
-```{r}
-
-
-
-ltc$Close %>% diff() %>% ggtsdisplay(main="")
-```
- 
-```{r}
-
-
-fitltc <- Arima(ltc$Close,order=c(2,1,25))
-fitltc
-checkresiduals(fitltc)
-
-```
-
-
-```{r}
-
-
-foreltc<- forecast(fitltc,h=20)
-
-autoplot(foreltc)
-```
-
-
-```{r}
-tsltc <- ts(ltc$Close[150:380])
-
-autoplot(foreltc)+autolayer(tsltc,series = "Data")+autolayer(foreltc$mean,series = "forecast")
-
-
-
-```
