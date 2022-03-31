@@ -16,13 +16,29 @@ library(lmtest)
 library(vars)
 set.seed(2022)
 data <- read.csv("CLOSINGPRICEDATA.csv")
-data1 <- data[1:100,]
+
 ```
 
+```{r,echo=FALSE}
 
+
+#data$Date <-mdy(data$Date)
+
+
+datadif <-data  %>% mutate(difbtc = data$BTC - lag(data$BTC))
+
+datadif <-datadif %>% mutate(difada = data$ADA - lag(data$ADA))
+
+datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
+
+datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
+
+
+data1 <- datadif[2:100,7:11]
+```
 
 ```{r}
-var1 <- VAR(data1[,-1],p=20,type = 'const')
+var1 <- VAR(data1,p=20,type = 'const')
 var1
 ```
 
@@ -41,19 +57,21 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=ADA),data = data[1:110,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$ADA[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
 ```
 
-
-
-
-
 ```{r}
-ggplot()+geom_line(aes(x=as.Date(Date),y=ETH),data = data[1:121,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[111:120,]$Date),y=fore$ETH[,1]),color='red')
+pred <- predict(var1)
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=LTC),data = data[1:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$LTC[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
 ```
 
 ```{r}
-ggplot()+geom_line(aes(x=as.Date(Date),y=LTC),data = data[1:121,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[111:120,]$Date),y=fore$LTC[,1]),color='red')
+pred <- predict(var1)
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=ETH),data = data[1:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:109,]$Date),y=fore$ETH[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
 ```
+
+
 
 ```{r}
 res <- resid(var1)
