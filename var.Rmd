@@ -19,6 +19,9 @@ data <- read.csv("CLOSINGPRICEDATA.csv")
 
 ```
 
+
+
+
 ```{r,echo=FALSE}
 
 
@@ -33,44 +36,81 @@ datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
 
 datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
 
+datadif$Date <- as.Date(data$Date)
+data1 <- datadif[2:100,8:11]
+```
 
-data1 <- datadif[2:100,7:11]
+
+# Bitcoin
+
+```{r}
+var1 <- VAR(data1,p=10,type = 'const')
+summary(var1)
+```
+# BTC
+
+```{r warning=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difbtc[,1]),color='red')+labs(title="VAR forecasts for Bitcoin",x="Date")
 ```
 
 ```{r}
-var1 <- VAR(data1,p=20,type = 'const')
-var1
+ggAcf(resid(var1))
+fanchart(pred)
+
 ```
 
 
-```{r}
-pred <- predict(var1)
 
-ggplot()+geom_line(aes(x=as.Date(Date),y=BTC),data = data[1:110,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$BTC[,1]),color='red')+labs(title="VAR forecasts for Bitcoin",x="Date")
-```
+# ADA
 
-```{r}
-pred <- predict(var1)
+```{r warning=FALSE}
+pred <- predict(var1,ahead=10)
 
-ggplot()+geom_line(aes(x=as.Date(Date),y=ADA),data = data[1:110,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$ADA[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
-```
+fore <- pred$fcst
 
-```{r}
-pred <- predict(var1)
-
-ggplot()+geom_line(aes(x=as.Date(Date),y=LTC),data = data[1:110,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$LTC[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difada[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
 ```
 
 ```{r}
-pred <- predict(var1)
+res<-resid(var1)
+ggAcf(res[,2])
+fanchart(pred)
 
-ggplot()+geom_line(aes(x=as.Date(Date),y=ETH),data = data[1:110,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:109,]$Date),y=fore$ETH[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
 ```
 
+
+
+
+
+
+
+
+
+
+# WAVE
+
+
+```{r warning=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difwave),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difwave[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
+```
+
+```{r}
+res<-resid(var1)
+ggAcf(res[,3])
+fanchart(pred)
+
+```
 
 
 ```{r}
@@ -78,4 +118,36 @@ res <- resid(var1)
 
 
 ```
+
+
+
+
+#ETH
+
+```{r warning=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difeth),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difeth[,1]),color='red')+labs(title="VAR forecasts for ADA",x="Date")
+```
+
+```{r}
+res<-resid(var1)
+ggAcf(res[,4])
+fanchart(pred)
+
+```
+
+
+```{r}
+res <- resid(var1)
+
+
+```
+
+
+
+
 

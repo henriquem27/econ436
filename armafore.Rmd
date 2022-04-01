@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 )
 data <- read.csv("CLOSINGPRICEDATA.csv")
 
-data$Date <-mdy(data$Date)
+data$Date <- as.Date(data$Date)
 
 
 datadif <-data  %>% mutate(difbtc = data$BTC - lag(data$BTC))
@@ -41,6 +41,8 @@ datadif <-datadif %>% mutate(difada = data$ADA - lag(data$ADA))
 datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
 
 datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
+
+
 
 ```
 
@@ -113,7 +115,7 @@ ggarrange(btc,ETH,ADA,WAVE)
 ```
 
 
-Looking at the plots I have decided to cut data at 2019-09-30. The reasoning behind this choice was that the crypto currencies have a period of high volatility in the beginning of the series, they then go through a period of "stability" the lasts up until the beginning of 2021. Hence, but making this I can have forcasting models that work for both periods.
+Looking at the plots I have decided to cut data at 2019-09-30. The reasoning behind this choice was that the crypto currencies have a period of high volatility in the beginning of the series, they then go through a period of "stability" the lasts up until the beginning of 2021. Hence, but making this I can have forecasting models that work for both periods.
 
 
 
@@ -186,7 +188,7 @@ fore2 <- forecast(fit2,h=11)
 
 tsbtc <- ts(data$BTC[1:111])
 
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
+autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecast for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
 
 
 ```
@@ -198,7 +200,7 @@ For the first period we can see above that forecast for the next 11 weeks follow
 ```{r}
 tsbtc <- ts(data$BTC[100:221])
 
-autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 2",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 2",subtitle="ARIMA Model with a MA8 and MA15",y="Price")
 
 ```
 
@@ -221,7 +223,7 @@ Looking at the ACF for Ethereum we can see that for the first period there is on
 
 ### Model Estimation for Ethereum
 
-```{r}
+```{r,echo=FALSE}
 
 fit <- Arima(data1$ETH,order=c(0,1,4),fixed=c(0,0,NA,NA))
 fit
@@ -234,6 +236,23 @@ checkresiduals(fit)
 
 ```
 
+For the first period I used a MA3 and MA4 model for forecasting, at first based of the correlelogram I fitted the model using only an MA3, however, there was a spike at lag 4 therefore, I added and MA4 to the model in order to make the residual correlogram white noise. Despite the residual without any significant lags, the coefficients for the model are statistically insignificant, and none of the models I tried to fit seemed to make the coefficients significant likely due to the nature of the data.
+
+
+```{r}
+
+fit2 <- Arima(data2$ETH,order=c(0,1,17),fixed=c(0,NA,0,NA,0,0,NA,0,0,NA,0,NA,0,0,0,0,NA))
+fit2
+
+coeftest(fit2)
+
+checkresiduals(fit2)
+
+
+
+```
+
+For the second period of Ethereum, I used Moving averages 2,4,7,10,12, and 17 in order to fit the model. Despite the  MA12 coefficient not being statistically significant I still kept it in the model since when I removed it there was a spike at lag 12 in the residual correlelogram, therefore, for forecasting purposes I have left it in the model.
 
 
 ### Forecasts for Ethereum
@@ -250,38 +269,180 @@ fore2 <- forecast(fit2,h=11)
 
 tsbtc <- ts(data$ETH[1:111])
 
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Ethereum period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
+autoplot(fore)+autolayer(tsbtc,series ="Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Ethereum period 1",subtitle="ARIMA Model with a MA3 and MA4",y="Price")
 
 
 ```
+
+
+Above we see the forecast for the first period, and we can see why the coefficients are close to zero since the data also seems to level out on the period we are trying to forecast, therefore, I would consider this to be an accurate forecast. On the plot we can see that the forecasts for the second period are quite good despite trend upwards for the first 2 weeks, it quickly reverts into a downtrend which quite close to the actual data.
+
+
+```{r}
+tsbtc <- ts(data$ETH[100:221])
+
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasting for Ethereum period 2",subtitle="ARIMA Model with MA at 2,4,7,10,12, and 17",y="Price")
+
+```
+
 
 ## Cardano
 
+### ACF for Cardano
+
 ```{r ada,echo=FALSE}
-data1$ADA %>% diff() %>% ggtsdisplay(main="ADA Period 1")
-data2$ADA %>% diff() %>% ggtsdisplay(main="ADA Period 2")
+data1$ADA %>% diff() %>% ggtsdisplay(main="Cardano Period 1")
+data2$ADA %>% diff() %>% ggtsdisplay(main="Cardano Period 2")
+```
+
+Looking at the ACF for the Cardano series, we can see that there are significant spikes at lag 3,5,7, it also seems to have AR(2) proccess as the series alternates between positive and negatives while decaying with each lag. For the second period there aren't any significant lag spikes, this is likely due to the periods that I choose to model, however, I did try other cuts but none of them seemed to work well, therefore, I kept it this way.
+
+### Model Estimation for Cardano
+
+```{r}
+
+fit <- Arima(data1$ADA,order=c(2,1,9),fixed=c(0,NA,0,NA,NA,0,NA,0,NA,NA,NA))
+fit
+
+coeftest(fit)
+
+checkresiduals(fit)
+
+
+
+```
+
+For the first period of Cardano the model that worked best was the one with a AR(2) process and moving averages 2,3,5,7,8, and 9, from the coefficients we can see that MA5 and MA8 are not statistically significant, however, when I tried to remove them, there were spikes at their respectives lags in the residual correlelogram, therefore, I decided to keep in order to get a better forecasting model for Cardano.
+
+```{r}
+
+fit2 <- Arima(data2$ADA,order=c(2,1,10))
+fit2
+
+coeftest(fit2)
+
+checkresiduals(fit2)
+
+
+
+```
+
+In the second period of the ACF for Cardano none of the lags were statistically significant therefore, I tried a few moving averages just so I could have some sort of forecast for the series. In the end I decided to keep model with an AR(2) process with moving averages from 1-10.
+
+
+
+### Forecasts for Cardano
+
+
+
+```{r,echo=FALSE,message=FALSE, warning=FALSE,echo=FALSE}
+fore <- forecast(fit,h=11)
+fore2 <- forecast(fit2,h=11)
 ```
 
 
+```{r,echo=FALSE}
 
-## Waves 
+tsbtc <- ts(data$ADA[1:111])
+
+autoplot(fore)+autolayer(tsbtc,series ="Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecasting for Cardano period 1",subtitle="ARIMA Model with an AR(2) and moving averages 2,3,5,7,8,9",y="Price")
+
+
+```
+
+
+In the plot above we have the first forecast, which seems to be pretty close of the real data in this as there is not a lot of variation in the series which makes this easier to predict. However, in the second period we can see that there is a lot volatility which the forecast also seems to have but it has not captured any of the downward trend of the actual series.
+
+
+```{r}
+tsbtc <- ts(data$ADA[100:221])
+
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasts for Cardano period 2",subtitle="ARIMA Model AR(2) process and MA1 to MA10",y="Price")
+
+```
+
+## Waves
+
+### ACF for Waves
 ```{r wave,echo=FALSE}
 data1$WAVES %>% diff() %>% ggtsdisplay(main="Waves Period 1")
 data2$WAVES %>% diff() %>% ggtsdisplay(main="Waves Period 2")
 ```
 
 
+  
+  In the First period of waves we have some significant spikes at lags 3,4, and 7, in contrast in the second period of waves we seem to have significant spikes at 2 but not a lot happening in the middle of the series up until lag 17 which is significant.
+
+
+### Model Estimation for Waves
+
+
+```{r}
+
+fit <- Arima(data1$WAVES,order=c(0,1,7),fixed=c(0,0,NA,NA,NA,0,NA))
+fit
+
+coeftest(fit)
+
+checkresiduals(fit)
 
 
 
+```
+
+For the first period the Waves model I decided to go with a MA3, MA4, MA5, and MA7 model, as we can see above all of the coefficients are statistically significant except the one for the MA5, however, I have decided to keep it in the model in order to remove a significant residual correlation on lag 5.
+
+
+```{r}
+
+fit2 <- Arima(data2$WAVES,order=c(0,1,17),fixed=c(0,NA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NA))
+fit2
+
+coeftest(fit2)
+
+checkresiduals(fit2)
 
 
 
+```
+
+For the second period as seen on the ACF, I decided to estimate a MA2 and MA17 model which seemed to work well as all of the coefficients are significant and the residual correlogram is completely white noise.
+
+
+### Forecasts for Waves
 
 
 
+```{r,echo=FALSE,message=FALSE, warning=FALSE,echo=FALSE}
+fore <- forecast(fit,h=11)
+fore2 <- forecast(fit2,h=11)
+```
 
 
+```{r,echo=FALSE}
+
+tsbtc <- ts(data$WAVES[1:111])
+
+autoplot(fore)+autolayer(tsbtc,series ="Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecast for Waves period 1",subtitle="ARIMA Model with a MA3, MA4, MA5 and MA7",y="Price")
+
+
+```
+
+
+In plot above we can see the forecast for the first period, it seems to follow somewhat well the trend despite a small upward trend in the beginning it flattens out afterwards as the data does. In contrast, for the second period the forecast is complete opposite of the actual trend, as the forecast predicts and upward trend while the data is on a complete downward trend.
+
+
+```{r}
+tsbtc <- ts(data$WAVES[100:221])
+
+autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasts for WAVES period 2",subtitle="ARIMA Model with MA2 and MA7",y="Price")
+
+```
+
+
+# Conclusion
+
+The models seem to have a lot of variability, some work reasonably well as well as other do not work at all. This might be due to the nature of the crypto currency market as its volatility varies a lot from period to period, also none of the crypto currencies seem to have a lot in commom in terms of what was used for modelling which further elaborates on the point that crypto market is just very volatile.
 
 
 
