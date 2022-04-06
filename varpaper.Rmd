@@ -56,7 +56,9 @@ For the lag of the VAR model I choose them based of the Root Mean Squared Error,
 
 
 
-# Acf
+# ACF of Residuals.
+
+## Period 1
 
 ```{r}
 ggarrange(
@@ -66,6 +68,7 @@ ggAcf(residuals(var1)[,3]),
 ggAcf(residuals(var1)[,4]))
 ```
 
+Looking at the ACFs for the first period, we can see that there's a few significant lags for Bitcoin, Ethereum and Waves. However, since the lag seleceted for the first period is 15 there is not much to do since these lags are already included in the model.
 
 
 ```{r}
@@ -76,11 +79,13 @@ ggAcf(residuals(var2)[,3]),
 ggAcf(residuals(var2)[,4]))
 ```
 
+Looking at the ACFs for the second period, is quite different from the first one as now we significant peaks for Ethereum, Waves, and Cardano, also most of the peaks occur at lags after 5. 
 
 
 
 
 # Bitcoin
+
 
 ## Period 1 
 
@@ -96,7 +101,7 @@ values <- fore$mean
 confl <- fore$lower[,1]
 confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:110,])+
-    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA11 forecasts for Bitcoin",x="Date",subtitle = "RMSE=0.1157642",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA11 forecasts for Bitcoin for Period 1",x="Date",subtitle = "RMSE=0.1157642",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
@@ -116,6 +121,11 @@ rmses[1,2]<-rmse
 ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:110,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
 ```
+
+
+Looking at the forecasts for period 1 it is pretty clear that the VAR does a lot better in forecasting as it pretty much matches timing the peaks and drops of the data despite not matching the size of the peaks. Meanwhile, in the univariate approach the forecast is doing almost the opposite.
+
+
 
 ## Period 2
 
