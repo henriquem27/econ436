@@ -55,6 +55,31 @@ rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA)
 For the lag of the VAR model I choose them based of the Root Mean Squared Error, I wrote a simple loop to go over a few lags between the models and based of those tables I choose the lag for the first period to be 15 and the lag for the second period to be 16, since both seemed to represent the lower RMSE between all the models for their respective periods.
 
 
+
+# Acf
+
+```{r}
+ggarrange(
+ggAcf(residuals(var1)[,1]),
+ggAcf(residuals(var1)[,2]),
+ggAcf(residuals(var1)[,3]),
+ggAcf(residuals(var1)[,4]))
+```
+
+
+
+```{r}
+ggarrange(
+ggAcf(residuals(var2)[,1]),
+ggAcf(residuals(var2)[,2]),
+ggAcf(residuals(var2)[,3]),
+ggAcf(residuals(var2)[,4]))
+```
+
+
+
+
+
 # Bitcoin
 
 ## Period 1 
