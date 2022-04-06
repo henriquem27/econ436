@@ -133,6 +133,7 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[100
   scale_color_manual(values=colors)
 ```
 
+For Bitcoin, the VAR outperformed the ARMA forecasts by quite a bit for the first period as we can see by the large difference between the RMSE where the VAR had a 0.05 RMSE and the 
 
 # Ehtereum
 

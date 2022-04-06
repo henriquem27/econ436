@@ -152,20 +152,20 @@ data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2 - 2019-09-30 to 2021
 ### Model Estimation for Bitcoin 
  
 ```{r,echo=FALSE}
-fit <- Arima(data1$difbtc,order=c(0,1,11),fixed=c(0,0,NA,0,0,0,0,0,0,0,NA))
+fit <- Arima(data1$difbtc,order=c(0,0,11))
 fit
 
 coeftest(fit)
 
 checkresiduals(fit)
 
-
+accuracy(fit)
 ```
   For the first period I ended fitting a MA3 and MA11 model, since when I fitted just the MA3 model and checked the residuals there seemed to be a spike at lag 11, therefore, I added it to the model. Checking the residuals afterwards everything is white noise and both coefficients are statistically significant.
 
 
 ```{r,echo=FALSE}
-fit2 <- Arima(data2$BTC,order=c(0,1,15),fixed=c(0,0,0,0,0,0,0,NA,0,0,0,0,0,0,NA))
+fit2 <- Arima(data2$difbtc,order=c(0,0,15))
 fit2
 
 
@@ -188,8 +188,13 @@ fore2 <- forecast(fit2,h=11)
 
 tsbtc <- ts(data$BTC[1:111])
 
-autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecast for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
+#autoplot(fore)+autolayer(tsbtc,series = "Data")+autolayer(fore$mean,series = "forecast")+labs(title= "Forecast for Bitcoin period 1",subtitle="ARIMA Model with a MA3 and MA11",y="Price")
 
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc),data = datadif[2:110,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:111,]$Date),y=values),color='red')+labs(title="VAR forecasts for Bitcoin",x="Date")+geom_ribbon(aes(x=as.Date(data[101:111,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")
 
 ```
 
@@ -198,9 +203,12 @@ For the first period we can see above that forecast for the next 11 weeks follow
 
 
 ```{r}
-tsbtc <- ts(data$BTC[100:221])
 
-autoplot(fore2)+autolayer(tsbtc,series = "Data")+autolayer(fore2$mean,series = "forecast")+labs(title= "Forecasting for Bitcoin period 2",subtitle="ARIMA Model with a MA8 and MA15",y="Price")
+values <- fore2$mean
+confl <- fore2$lower[,1]
+confh <- fore2$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc),data = datadif[100:221,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[211:221,]$Date),y=values),color='red')+labs(title="VAR forecasts for Bitcoin",x="Date")+geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")
 
 ```
 

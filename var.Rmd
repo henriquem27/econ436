@@ -28,34 +28,51 @@ data <- read.csv("CLOSINGPRICEDATA.csv")
 #data$Date <-mdy(data$Date)
 
 
-datadif <-data  %>% mutate(difbtc = data$BTC - lag(data$BTC))
+datadif <-data  %>% mutate(difbtc = log(data$BTC) - log(lag(data$BTC)))
 
-datadif <-datadif %>% mutate(difada = data$ADA - lag(data$ADA))
+datadif <-datadif %>% mutate(difada = log(data$ADA) - log(lag(data$ADA)))
 
-datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
+datadif <-datadif  %>% mutate(difwave = log(data$WAVES) - log(lag(data$WAVES)))
 
-datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
+datadif <-datadif  %>% mutate(difeth = log(data$ETH) - log(lag(data$ETH)))
 
 datadif$Date <- as.Date(data$Date)
 data1 <- datadif[2:100,8:11]
+data2 <- datadif[100:210,8:11]
+
+
 ```
+
+# Lag Selection 
+
+
+```{r}
+lagselect <- VARselect(data1,lag.max =16)
+
+lagselect$selection
+```
+
 
 
 # Bitcoin
 
 ```{r}
-var1 <- VAR(data1,p=10,type = 'const')
-summary(var1)
+var1 <- VAR(data1,p=15,type = 'const')
+
 ```
-# BTC
+
+
+# Period 1 
 
 ```{r warning=FALSE}
 pred <- predict(var1,ahead=10)
 
 fore <- pred$fcst
+mse <- mean(residuals(var1)[,1]^2)
 
+rmse <- sqrt(mse)
 ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc),data = datadif[2:110,])+
-  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difbtc[,1]),color='red')+labs(title="VAR forecasts for Bitcoin",x="Date")
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difbtc[,1]),color='red')+labs(title="VAR forecasts for Bitcoin Period 1",x="Date")
 ```
 
 ```{r}
