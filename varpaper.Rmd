@@ -1,0 +1,394 @@
+---
+title: "Vector Auto Regression for Cryptocurrencies"
+author: "Henrique Magalhaes Rio"
+date: "3/28/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+library(forecast)
+library(lubridate)
+library(lmtest)
+library(vars)
+set.seed(2022)
+data <- read.csv("CLOSINGPRICEDATA.csv")
+
+```
+
+
+
+
+```{r,echo=FALSE}
+
+
+#data$Date <-mdy(data$Date)
+
+datadif <-data  %>% mutate(difbtc = log(data$BTC) - log(lag(data$BTC)))
+
+datadif <-datadif %>% mutate(difada = log(data$ADA) - log(lag(data$ADA)))
+
+datadif <-datadif  %>% mutate(difwave = log(data$WAVES) - log(lag(data$WAVES)))
+
+datadif <-datadif  %>% mutate(difeth = log(data$ETH) - log(lag(data$ETH)))
+
+datadif$Date <- as.Date(data$Date)
+data1 <- datadif[2:100,8:11]
+data2 <- datadif[100:210,8:11]
+var1 <- VAR(data1,p=15,type = 'const')
+var2 <- VAR(data2,p=16,type = 'const')
+
+colors<- c("Forecast"="red","Data"="black")
+
+rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA)
+
+```
+
+
+# Lag Selection 
+
+For the lag of the VAR model I choose them based of the Root Mean Squared Error, I wrote a simple loop to go over a few lags between the models and based of those tables I choose the lag for the first period to be 15 and the lag for the second period to be 16, since both seemed to represent the lower RMSE between all the models for their respective periods.
+
+
+# Bitcoin
+
+## Period 1 
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difbtc,order=c(0,0,11))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:110,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA11 forecasts for Bitcoin",x="Date",subtitle = "RMSE=0.1157642",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,1]^2)
+
+rmse <- sqrt(mse)
+
+rmses[1,1]<-rmsear[2]
+
+rmses[1,2]<-rmse
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+```
+
+## Period 2
+
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difbtc,order=c(0,0,15))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[100:221,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="MA15 forecasts for Bitcoin",x="Date",y="Percentage Change",subtitle = "RMSE=0.1075312")+
+  geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var2,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var2)[,1]^2)
+
+rmse <- sqrt(mse)
+
+
+rmses[2,1]<-rmsear[2]
+
+rmses[2,2]<-rmse
+ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[100:221,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="VAR forecasts for Bitcoin Period 2",x="Date",subtitle = "RMSE=0.0720",y="Percentage Change")+
+  geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+
+  scale_color_manual(values=colors)
+```
+
+
+# Ehtereum
+
+
+## Period 1 
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difeth,order=c(0,0,4))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[2:110,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA4 forecasts for Ethereum Period 2",x="Date",subtitle = "RMSE=0.1595299",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,4]^2)
+
+rmse <- sqrt(mse)
+
+
+rmses[3,1]<-rmsear[2]
+
+rmses[3,2]<-rmse
+ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difeth[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Ethereum Period 1",x="Date",subtitle = "RMSE=0.07242546
+",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difeth[,3],ymin=fore$difeth[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+```
+
+
+## Period 2
+
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difeth,order=c(0,0,17))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[100:221,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="MA17 forecasts for Ethereum",x="Date",y="Percentage Change",subtitle = "RMSE=0.1400773")+
+  geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var2,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var2)[,4]^2)
+
+rmse <- sqrt(mse)
+
+rmses[4,1]<-rmsear[2]
+
+rmses[4,2]<-rmse
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[100:221,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difeth[,1],color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="VAR forecasts for Ethereum Period 2",x="Date",subtitle = "RMSE=0.08631429",y="Percentage Change")+
+  geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difeth[,3],ymin=fore$difeth[,2]),fill='cyan',alpha=0.3)+
+  scale_color_manual(values=colors)
+```
+
+# Cardano
+
+## Period 1
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difada,order=c(0,0,9))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[2:110,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA9 forecasts for Cardano Period 2",x="Date",subtitle = "RMSE=0.231928",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,2]^2)
+
+rmse <- sqrt(mse)
+
+rmses[5,1]<-rmsear[2]
+
+rmses[5,2]<-rmse
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difada[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Cardano Period 1",x="Date",subtitle = "RMSE=0.07409259
+",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difada[,3],ymin=fore$difada[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+```
+
+
+
+## Period 2
+
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difada,order=c(0,0,10))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="MA10 forecasts for Cardano",x="Date",y="Percentage Change",subtitle = "RMSE=0.2269583")+
+  geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var2,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var2)[,2]^2)
+
+rmse <- sqrt(mse)
+
+rmses[6,1]<-rmsear[2]
+
+rmses[6,2]<-rmse
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difada[,1],color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="VAR forecasts for Cardano Period 2",x="Date",subtitle = "RMSE=0.1030585",y="Percentage Change")+
+  geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difada[,3],ymin=fore$difada[,2]),fill='cyan',alpha=0.3)+
+  scale_color_manual(values=colors)
+```
+
+
+# Waves
+
+## Period 1
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difwave,order=c(0,0,7))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[2:110,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA7 forecasts for Waves Period 1",x="Date",subtitle = "RMSE=0.1557948",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,3]^2)
+
+rmse <- sqrt(mse)
+
+rmses[7,1]<-rmsear[2]
+
+rmses[7,2]<-rmse
+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[2:110,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difwave[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Waves Period 1",x="Date",subtitle = "RMSE=0.06828217
+",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difwave[,3],ymin=fore$difwave[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+```
+
+## Period 2
+
+```{r,echo=FALSE}
+fit <- Arima(data1$difwave,order=c(0,0,17))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+
+
+
+values <- fore$mean
+confl <- fore$lower[,1]
+confh <- fore$upper[,1]
+ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[100:221,])+
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94,alpha=0.94)+
+  labs(title="MA17 forecasts for Waves",x="Date",y="Percentage Change",subtitle = "RMSE=0.1347458")+
+  geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+
+```
+
+
+
+
+```{r warning=FALSE,echo=FALSE}
+pred <- predict(var2,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var2)[,3]^2)
+
+rmse <- sqrt(mse)
+
+rmses[8,1]<-rmsear[2]
+
+rmses[8,2]<-rmse
+ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
+  scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
+  geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difwave[,1],color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="VAR forecasts for Waves Period 2",x="Date",subtitle = "RMSE=0.1003866",y="Percentage Change")+
+  geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difwave[,3],ymin=fore$difwave[,2]),fill='cyan',alpha=0.3)+
+  scale_color_manual(values=colors)
+```
+
+
+# Conclusion
+
+| Variables | ARMA RMSE | VAR RMSE | 
+|-----------:|:---------|---------|
+|   BITCOIN PERIOD 1  |  0.1157642  |    0.05006434   |    
+|  BITCOIN PERIOD 2  |  0.1075312 |   0.06566257   |   
+|    ETHEREUM PERIOD 1 |   0.1595299 |     0.07242546   |
+| ETHEREUM PERIOD 2 | 0.1400773 | 0.07724711 |
+| CARDANO PERIOD 1 | 0.2319280 | 0.07409259 |
+| CARDANO PERIOD 2 |  0.2269583 | 0.09029023|
+| WAVES PERIOD 1 | 0.1557948 | 0.06828217 |
+| WAVES PERIOD 2 | 0.1347458 | 0.08246645 |
+
+
+
+
+
+
+

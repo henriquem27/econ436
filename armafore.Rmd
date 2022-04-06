@@ -34,13 +34,13 @@ data <- read.csv("CLOSINGPRICEDATA.csv")
 data$Date <- as.Date(data$Date)
 
 
-datadif <-data  %>% mutate(difbtc = data$BTC - lag(data$BTC))
+datadif <-data  %>% mutate(difbtc = log(data$BTC) - log(lag(data$BTC)))
 
-datadif <-datadif %>% mutate(difada = data$ADA - lag(data$ADA))
+datadif <-datadif %>% mutate(difada = log(data$ADA) - log(lag(data$ADA)))
 
-datadif <-datadif  %>% mutate(difwave = data$WAVES - lag(data$WAVES))
+datadif <-datadif  %>% mutate(difwave = log(data$WAVES) - log(lag(data$WAVES)))
 
-datadif <-datadif  %>% mutate(difeth = data$ETH - lag(data$ETH))
+datadif <-datadif  %>% mutate(difeth = log(data$ETH) - log(lag(data$ETH)))
 
 
 
@@ -135,8 +135,8 @@ The First step for forecasting is looking at the Auto Correlation Function (ACF)
 
 ```{r btc, echo=FALSE}
 
-data1 <- data[1:100,]
-data2 <- data[100:210,]
+data1 <- datadif[1:100,]
+data2 <- datadif[100:210,]
 data1$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 1 - 2017-11-06 to 2019-09-30
 ")
 data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2 - 2019-09-30 to 2021-11-15
@@ -152,7 +152,7 @@ data2$BTC %>% diff() %>% ggtsdisplay(main="Bitcoin Period 2 - 2019-09-30 to 2021
 ### Model Estimation for Bitcoin 
  
 ```{r,echo=FALSE}
-fit <- Arima(data1$BTC,order=c(0,1,11),fixed=c(0,0,NA,0,0,0,0,0,0,0,NA))
+fit <- Arima(data1$difbtc,order=c(0,1,11),fixed=c(0,0,NA,0,0,0,0,0,0,0,NA))
 fit
 
 coeftest(fit)
