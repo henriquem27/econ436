@@ -52,6 +52,7 @@ for (i in 2:11) {
 
 predibtc <- c(data[230,2],predi[,1])
 
+prediwav <- c(data[230,5],predi[,4])
 ```
 
 
@@ -60,13 +61,22 @@ predibtc <- c(data[230,2],predi[,1])
 
 
 ```{r}
+
+  
 ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Bitcoin,group=1))+geom_line(aes(x=as.Date(predidates),y=predibtc),color="red")+labs(y="Price", x="Date",title = "Bitcoin")+scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))
 
 
 
 ```
 
+```{r}
 
+  
+ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Waves,group=1))+geom_line(aes(x=as.Date(predidates),y=prediwav),color="red")+labs(y="Price", x="Date",title = "Bitcoin")+scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))
+
+
+
+```
 
 
 
