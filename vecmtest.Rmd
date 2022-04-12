@@ -1,0 +1,72 @@
+---
+title: "vecmtest"
+author: "Henrique Magalhaes Rio"
+date: "4/11/2022"
+output: pdf_document
+---
+
+
+```{r}
+
+library(tsDyn)
+library(tidyverse)
+library(vars)
+library(lubridate)
+data <- read.csv("cryptosup.csv")
+
+
+```
+
+
+
+```{r}
+vecm.jo<-VECM(data[,2:5], lag=5, estim="ML",r=3)
+
+summary(vecm.jo)
+```
+
+```{r}
+pred<-predict_rolling(vecm.jo, nroll = 10, n.ahead = 1)
+
+predi <- predict(vecm.jo, n.ahead = 10)
+```
+
+
+```{r}
+ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,1],group=1),color="red")+geom_line(data =data,aes(x=as.Date(Date),y=Bitcoin,group=1))
+```
+
+
+```{r}
+ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,2],group=1),color="cyan")+geom_line(data =data,aes(x=as.Date(Date),y=Cardano,group=1))
+```
+
+```{r}
+dates <- as.Date(data[,1])
+predidates<-1:10
+
+predidates[1] <- dates[230]
+for (i in 2:11) {
+  predidates[i]<-dates[230]+weeks(i)
+}
+
+predibtc <- c(data[230,2],predi[,1])
+
+```
+
+
+
+
+
+
+```{r}
+ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Bitcoin,group=1))+geom_line(aes(x=as.Date(predidates),y=predibtc),color="red")+labs(y="Price", x="Date",title = "Bitcoin")+scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))
+
+
+
+```
+
+
+
+
+
