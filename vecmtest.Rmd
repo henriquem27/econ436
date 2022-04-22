@@ -19,26 +19,36 @@ data <- read.csv("cryptosup.csv")
 
 
 
+
+
+
 ```{r}
-vecm.jo<-VECM(data[,2:5], lag=5, estim="ML",r=3)
+vecm.jo<-VECM(data.frame(waves=log(data[,5]),cardano=log(data[,3]),eth=log(data[,4]),btc=log(data[,2])), lag=20, estim="ML",r=3)
 
 summary(vecm.jo)
+
+
 ```
+
+
+
 
 ```{r}
 pred<-predict_rolling(vecm.jo, nroll = 10, n.ahead = 1)
 
 predi <- predict(vecm.jo, n.ahead = 10)
+
+pred
 ```
 
 
 ```{r}
-ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,1],group=1),color="red")+geom_line(data =data,aes(x=as.Date(Date),y=Bitcoin,group=1))
+ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,3],group=1),color="red")+geom_line(data =data,aes(x=as.Date(Date),y=log(Bitcoin),group=1))
 ```
 
 
 ```{r}
-ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,2],group=1),color="cyan")+geom_line(data =data,aes(x=as.Date(Date),y=Cardano,group=1))
+ggplot()+geom_line(aes(x=as.Date(data[221:230,1]),y=pred$pred[,2],group=1),color="red")+geom_line(data =data,aes(x=as.Date(Date),y=log(Cardano),group=1))
 ```
 
 ```{r}
@@ -50,7 +60,7 @@ for (i in 2:11) {
   predidates[i]<-dates[230]+weeks(i)
 }
 
-predibtc <- c(data[230,2],predi[,1])
+predibtc <- c(data[230,2],predi[,3])
 
 prediwav <- c(data[230,5],predi[,4])
 ```
@@ -72,7 +82,7 @@ ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Bitcoin,group=1))+
 ```{r}
 
   
-ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Waves,group=1))+geom_line(aes(x=as.Date(predidates),y=prediwav),color="red")+labs(y="Price", x="Date",title = "Bitcoin")+scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))
+ggplot()+geom_line(data =data[150:230,],aes(x=as.Date(Date),y=Waves,group=1))+geom_line(aes(x=as.Date(predidates),y=prediwav),color="red")+labs(y="Price", x="Date",title = "Waves")+scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))
 
 
 
