@@ -1,0 +1,150 @@
+---
+title: "stat460"
+author: "Henrique Magalhaes Rio"
+date: "4/18/2022"
+output: html_document
+---
+
+```{r}
+library(OpenImageR)
+library(dplyr)
+library(ggbiplot)
+
+```
+
+
+
+```{r}
+
+
+path="C:/Users/henri/Documents/stat460/Training/glioma_tumor"
+
+setwd(path)
+Files <- list.files()
+Results <- list()
+for(i in seq_along(Files)){
+      Image <- readImage(Files[i])
+      Resized <- resizeImage(Image, width = 200, height = 200)
+      Gray <- rgb_2gray(Resized)
+      Results[[i]] <- Gray
+}
+
+
+```
+
+
+```{r}
+
+
+path="C:/Users/henri/Documents/stat460/Training/no_tumor"
+
+setwd(path)
+Files <- list.files()
+Results2 <- list()
+for(i in seq_along(Files)){
+      Image <- readImage(Files[i])
+      Resized <- resizeImage(Image, width = 200, height = 200)
+      Gray <- rgb_2gray(Resized)
+      Results2[[i]] <- Gray
+}
+
+
+```
+
+
+
+
+
+
+```{r}
+pca<-prcomp(Results[[1]])
+
+mma<-as.matrix(cbind(pca$x[,1:100]))
+
+```
+
+
+
+```{r}
+df <- data.frame(matrix(ncol = 200, nrow = 826))
+
+for(i in 1:826){
+
+pca<-prcomp(Results[[i]])
+row <-pca$x[,1]
+
+df[i,]<-row
+
+
+}
+
+```
+
+
+
+```{r}
+df2 <- data.frame(matrix(ncol = 200, nrow = 395))
+
+for(i in 1:395){
+
+pca<-prcomp(Results2[[i]])
+
+row <-pca$x[,1]
+
+df2[i,]<-row
+
+
+}
+
+```
+
+
+```{r}
+
+df<-df %>%
+  mutate(cancer="Has Tumor")
+
+df2 <-df2 %>% mutate(cancer="No Tumor")
+
+data <-rbind(df,df2)
+
+
+pca2 <- prcomp(data[,1:200],scale. = TRUE)
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+ggbiplot(pca2,groups = as.factor(data$cancer),var.axes = F)
+```
+
+
+
+ 
+
+
+
+```{r}
+clust <- hclust(dist(data[,1:200]))
+
+plot(clust)
+```
+
+
+
+
+```{r}
+cutree <- cutree(clust,k=2)
+
+```
+
+
+
+
