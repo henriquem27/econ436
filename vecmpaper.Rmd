@@ -1,0 +1,96 @@
+---
+title: "VECMPAPER"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tseries)
+library(ggpubr)
+library(forecast)
+library(lubridate)
+library(lmtest)
+library(vars)
+library(tsDyn)
+set.seed(2022)
+data <- read.csv("cryptosup.csv")
+
+```
+
+
+
+
+```{r,echo=FALSE}
+
+
+#data$Date <-mdy(data$Date)
+
+datadif <-data  %>% mutate(difbtc = log(data$Bitcoin) - log(lag(data$Bitcoin)))
+
+datadif <-datadif %>% mutate(difada = log(data$Cardano) - log(lag(data$Cardano)))
+
+datadif <-datadif  %>% mutate(difwave = log(data$Waves) - log(lag(data$Waves)))
+
+datadif <-datadif  %>% mutate(difeth = log(data$Ethereum) - log(lag(data$Ethereum)))
+
+datadif$Date <- as.Date(data$Date)
+data1 <- datadif[2:215,6:9]
+var1 <- VAR(data1,p=15,type = 'const')
+data2 <- datadif[2:215,2:5]
+vecm<-VECM(data.frame(waves=log(data2[,4]),cardano=log(data2[,2]),eth=log(data2[,3]),btc=log(data2[,1])), lag=20, estim="ML",r=3)
+
+rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA,"VECM_RMSE"=NA)
+colors<- c("Forecast"="red","Data"="black")
+```
+
+
+
+#Bitcoin
+
+
+```{r,echo=FALSE,fig.width=10,fig.height=7}
+fit <- Arima(data1$difbtc,order=c(0,0,11))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+rmsear
+
+```
+
+
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,1]^2)
+
+rmvar <- sqrt(mse)
+rmvar
+
+#ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif)+
+ # scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[221:230,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[221:230,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+
+```
+
+```{r}
+mse <- mean(vecm$residuals[,1]^2)
+
+rmvecm <- sqrt(mse)
+
+rmvecm
+
+
+
+
+
+```
+
+
+
+
+

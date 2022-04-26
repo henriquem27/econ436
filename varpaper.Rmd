@@ -1,10 +1,11 @@
 ---
-title: "Vector Auto Regression for Cryptocurrencies"
+title: "Vector Auto Regression Forecasting for Cryptocurrencies"
 author: "Henrique Magalhaes Rio"
 date: "3/28/2022"
 output:
-  pdf_document: default
+  word_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -52,7 +53,7 @@ rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA)
 
 # Lag Selection 
 
-For the lag of the VAR model I choose them based of the Root Mean Squared Error, I wrote a simple loop to go over a few lags between the models and based of those tables I choose the lag for the first period to be 15 and the lag for the second period to be 16, since both seemed to represent the lower RMSE between all the models for their respective periods.
+For the lag of the VAR model I choose them based of the Root Mean Squared Error, I looked over a few lags between the models and based of those tables I choose the lag for the first period to be 15 and the lag for the second period to be 16, since both seemed to represent the lower RMSE between all the models for their respective periods.
 
 
 
@@ -60,23 +61,23 @@ For the lag of the VAR model I choose them based of the Root Mean Squared Error,
 
 ## Period 1
 
-```{r}
+```{r warning=FALSE,echo=FALSE}
 ggarrange(
-ggAcf(residuals(var1)[,1]),
-ggAcf(residuals(var1)[,2]),
-ggAcf(residuals(var1)[,3]),
-ggAcf(residuals(var1)[,4]))
+ggAcf(residuals(var1)[,1], main="Bitcoin Period 1"),
+ggAcf(residuals(var1)[,2], main="Cardano Period 1"),
+ggAcf(residuals(var1)[,3], main="Waves Period 1"),
+ggAcf(residuals(var1)[,4], main="Ethereum Period 1"))
 ```
 
 Looking at the ACFs for the first period, we can see that there's a few significant lags for Bitcoin, Ethereum and Waves. However, since the lag seleceted for the first period is 15 there is not much to do since these lags are already included in the model.
 
 
-```{r}
+```{r warning=FALSE,echo=FALSE}
 ggarrange(
-ggAcf(residuals(var2)[,1]),
-ggAcf(residuals(var2)[,2]),
-ggAcf(residuals(var2)[,3]),
-ggAcf(residuals(var2)[,4]))
+ggAcf(residuals(var2)[,1], main="Bitcoin Period 2"),
+ggAcf(residuals(var2)[,2], main="Cardano Period 2"),
+ggAcf(residuals(var2)[,3], main="Waves Period 2"),
+ggAcf(residuals(var2)[,4], main="Ethereum Period 2"))
 ```
 
 Looking at the ACFs for the second period, is quite different from the first one as now we significant peaks for Ethereum, Waves, and Cardano, also most of the peaks occur at lags after 5. 
@@ -89,7 +90,7 @@ Looking at the ACFs for the second period, is quite different from the first one
 
 ## Period 1 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difbtc,order=c(0,0,11))
 rmsear<-accuracy(fit)
 
@@ -106,7 +107,7 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:1
 ```
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var1,ahead=10)
 
 fore <- pred$fcst
@@ -123,14 +124,16 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[2:1
 ```
 
 
-Looking at the forecasts for period 1 it is pretty clear that the VAR does a lot better in forecasting as it pretty much matches timing the peaks and drops of the data despite not matching the size of the peaks. Meanwhile, in the univariate approach the forecast is doing almost the opposite.
+
+
+Looking at the forecasts for period 1 it is pretty clear that the VAR does a lot better in forecasting as it pretty much matches timing the peaks and drops of the data despite not matching the size of the peaks. Meanwhile, in the univariate approach the forecast is doing almost the opposite as the actual data as it predict peaks where there is a drop and a drop where there is a peak. This is further confirmed by the difference in the RMSE where the univariate had a rmse of 0.11 and the VAR had a much smaller RMSE at 0.05.
 
 
 
 ## Period 2
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difbtc,order=c(0,0,15))
 rmsear<-accuracy(fit)
 
@@ -142,13 +145,13 @@ confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[100:221,])+
     scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="MA15 forecasts for Bitcoin",x="Date",y="Percentage Change",subtitle = "RMSE=0.1075312")+
+  labs(title="MA15 forecasts for Bitcoin Period 2",x="Date",y="Percentage Change",subtitle = "RMSE=0.1075312")+
   geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var2,ahead=10)
 
 fore <- pred$fcst
@@ -163,19 +166,19 @@ rmses[2,2]<-rmse
 ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif[100:221,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="VAR forecasts for Bitcoin Period 2",x="Date",subtitle = "RMSE=0.0720",y="Percentage Change")+
+  labs(title="VAR forecasts for Bitcoin Period 2",x="Date",subtitle = "RMSE=0.06566257",y="Percentage Change")+
   geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+
   scale_color_manual(values=colors)
 ```
 
-For Bitcoin, the VAR outperformed the ARMA forecasts by quite a bit for the first period as we can see by the large difference between the RMSE where the VAR had a 0.05 RMSE and the 
+For the second period of Bitcoin, despite the VAR model having a lower RMSE at 0.066 when compared to the univariate RMSE=0.107, visually it seems like the univariate model does a better job in the forecast it seems to be closer to the actual downward trend, while the VAR model has 2 big spikes that are completely unrepresentative of the data. This might be due to a shift in the Crypto market as Bitcoin surges to all time high prices it might have become more dominant in the market, which may have caused it to be less influenced by the prices of the other cryptocurrencies.
 
 # Ehtereum
 
 
 ## Period 1 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difeth,order=c(0,0,4))
 rmsear<-accuracy(fit)
 
@@ -185,13 +188,13 @@ values <- fore$mean
 confl <- fore$lower[,1]
 confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[2:110,])+
-    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA4 forecasts for Ethereum Period 2",x="Date",subtitle = "RMSE=0.1595299",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA4 forecasts for Ethereum Period 1",x="Date",subtitle = "RMSE=0.1595299",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var1,ahead=10)
 
 fore <- pred$fcst
@@ -208,11 +211,13 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[2:1
 ",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difeth[,3],ymin=fore$difeth[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
 ```
 
+For the first period of the Ethereum, we can see that the VAR forecast (RMSE=0.0724) is quite a bit better as it managed to almost precisely fit the data trends while even accurately fitting the drop and the peak of the data.In contrast the univariate forecast (RMSE=0.15) went completely flat after a few periods and completely misses the trend of the data.
+
 
 ## Period 2
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difeth,order=c(0,0,17))
 rmsear<-accuracy(fit)
 
@@ -224,13 +229,13 @@ confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[100:221,])+
     scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="MA17 forecasts for Ethereum",x="Date",y="Percentage Change",subtitle = "RMSE=0.1400773")+
+  labs(title="MA17 forecasts for Ethereum Period 2",x="Date",y="Percentage Change",subtitle = "RMSE=0.1400773")+
   geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var2,ahead=10)
 
 fore <- pred$fcst
@@ -245,16 +250,19 @@ rmses[4,2]<-rmse
 ggplot()+geom_line(aes(x=as.Date(Date),y=difeth,color="Data"),data = datadif[100:221,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difeth[,1],color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="VAR forecasts for Ethereum Period 2",x="Date",subtitle = "RMSE=0.08631429",y="Percentage Change")+
+  labs(title="VAR forecasts for Ethereum Period 2",x="Date",subtitle = "RMSE=0.07724711",y="Percentage Change")+
   geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difeth[,3],ymin=fore$difeth[,2]),fill='cyan',alpha=0.3)+
   scale_color_manual(values=colors)
 ```
+
+For the second period of Ethereum we see something similar to Bitcoin as the gap between the Univariate model (RMSE=0.14) and the VAR model (RMSE=0.077) is now closer in terms of the RMSE, and the VAR model completely misses the downward trend and spikes up, while the univariate model presents a somewhat flat trend. This likely due to some of the market differences when comparing the two periods, as in the second Ethereum is also a much more robust coin, therefore, it might be less influenced by the other crypto currencies.
+
 
 # Cardano
 
 ## Period 1
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difada,order=c(0,0,9))
 rmsear<-accuracy(fit)
 
@@ -264,11 +272,11 @@ values <- fore$mean
 confl <- fore$lower[,1]
 confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[2:110,])+
-    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA9 forecasts for Cardano Period 2",x="Date",subtitle = "RMSE=0.231928",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
+    scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[100:110,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+labs(title="MA9 forecasts for Cardano Period 1",x="Date",subtitle = "RMSE=0.231928",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[100:110,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var1,ahead=10)
 
 fore <- pred$fcst
@@ -283,13 +291,13 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[2:1
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[101:110,]$Date),y=fore$difada[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Cardano Period 1",x="Date",subtitle = "RMSE=0.07409259
 ",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difada[,3],ymin=fore$difada[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
 ```
-
-
+ 
+For Cardano's first period there a large difference between the error forecasts, as the univariate has a RMSE of 0.2319 and the VAR has an RMSE of 0.074, and as we can see in the plot the the univariate model missed the trends in the data while the VAR forecast get's pretty close to the overall trend of the data.
 
 ## Period 2
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difada,order=c(0,0,10))
 rmsear<-accuracy(fit)
 
@@ -301,14 +309,14 @@ confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
     scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="MA10 forecasts for Cardano",x="Date",y="Percentage Change",subtitle = "RMSE=0.2269583")+
+  labs(title="MA10 forecasts for Cardano Period 2",x="Date",y="Percentage Change",subtitle = "RMSE=0.2269583")+
   geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
 
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var2,ahead=10)
 
 fore <- pred$fcst
@@ -322,17 +330,18 @@ rmses[6,2]<-rmse
 ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difada[,1],color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="VAR forecasts for Cardano Period 2",x="Date",subtitle = "RMSE=0.1030585",y="Percentage Change")+
+  labs(title="VAR forecasts for Cardano Period 2",x="Date",subtitle = "RMSE=0.09029023",y="Percentage Change")+
   geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difada[,3],ymin=fore$difada[,2]),fill='cyan',alpha=0.3)+
   scale_color_manual(values=colors)
 ```
 
+In the second period we can see some similarities with the first period, as despite the smaller margin there is still a large difference between the errors of the univariate (RMSE=0.2269)  and the VAR model (RMSE=0.09). However, contrary to Bitcoin and Ethereum, the forecasts for the second period seem to match pretty well with the actual data, this likely due to the fact the Cardano is still largely influeced by the crypto  market as an Up and Coming crypto currency.
 
 # Waves
 
 ## Period 1
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difwave,order=c(0,0,7))
 rmsear<-accuracy(fit)
 
@@ -347,7 +356,7 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[2:
 ```
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var1,ahead=10)
 
 fore <- pred$fcst
@@ -364,9 +373,12 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[2:
 ",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[101:110,]$Date),ymax=fore$difwave[,3],ymin=fore$difwave[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
 ```
 
+ For the first period for Waves we see something similar to cardano as there is a again larger difference between the Univariate RMSE (0.155) and the VAR RMSE (0.0682), due to this the univariate model misses most of the trends in the later weeks, while the VAR gets the forecast some what correct up to the last period.
+
+
 ## Period 2
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,fig.width=10,fig.height=7}
 fit <- Arima(data1$difwave,order=c(0,0,17))
 rmsear<-accuracy(fit)
 
@@ -380,8 +392,8 @@ confl <- fore$lower[,1]
 confh <- fore$upper[,1]
 ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[100:221,])+
     scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
-  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94,alpha=0.94)+
-  labs(title="MA17 forecasts for Waves",x="Date",y="Percentage Change",subtitle = "RMSE=0.1347458")+
+  geom_line(aes(x=as.Date(data[211:221,]$Date),y=values,color='Forecast'),size=0.8,alpha=0.94)+
+  labs(title="MA17 forecasts for Waves Period 2",x="Date",y="Percentage Change",subtitle = "RMSE=0.1347458")+
   geom_ribbon(aes(x=as.Date(data[211:221,]$Date),ymin=confl,ymax=confh),alpha=0.3,fill="cyan")+scale_color_manual(values=colors)
 
 ```
@@ -389,7 +401,7 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[10
 
 
 
-```{r warning=FALSE,echo=FALSE}
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var2,ahead=10)
 
 fore <- pred$fcst
@@ -400,13 +412,16 @@ rmse <- sqrt(mse)
 rmses[8,1]<-rmsear[2]
 
 rmses[8,2]<-rmse
-ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100:221,])+
+ggplot()+geom_line(aes(x=as.Date(Date),y=difwave,color="Data"),data = datadif[100:221,])+
   scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+
   geom_line(aes(x=as.Date(data[212:221,]$Date),y=fore$difwave[,1],color='Forecast'),size=0.8,alpha=0.94)+
-  labs(title="VAR forecasts for Waves Period 2",x="Date",subtitle = "RMSE=0.1003866",y="Percentage Change")+
+  labs(title="VAR forecasts for Waves Period 2",x="Date",subtitle = "RMSE=0.082466",y="Percentage Change")+
   geom_ribbon(aes(x=as.Date(data[212:221,]$Date),ymax=fore$difwave[,3],ymin=fore$difwave[,2]),fill='cyan',alpha=0.3)+
   scale_color_manual(values=colors)
 ```
+
+For the second period forecast of Waves, there is quite a large difference when compared to the first one as now the Univariate approach (RMSE=0.1347) seems to be much closer to the VAR approach (RMSE=0.08) when compared to the first period. Moreover, looking at the plot but approaches seem to be quite far off the actual data trend, this might be due to the changes in the crypto market similiar to Ethereum and Bitcoin, which might have made Waves less correlated with the other crypto currencies.
+
 
 
 # Conclusion
@@ -421,6 +436,9 @@ ggplot()+geom_line(aes(x=as.Date(Date),y=difada,color="Data"),data = datadif[100
 | CARDANO PERIOD 2 |  0.2269583 | 0.09029023|
 | WAVES PERIOD 1 | 0.1557948 | 0.06828217 |
 | WAVES PERIOD 2 | 0.1347458 | 0.08246645 |
+
+In conclusion, we can see that the the VAR models outperformed the Univariate models in all of the Cryptocurrencies which indicates that the crypto markets is connected as it was expected. However, between the VAR models it also seems that the first period RMSE is always lower the the Second period which could be an indication that the crypto market is changing and that cryptocurrencies prices are not as correlated as they were before.
+
 
 
 
