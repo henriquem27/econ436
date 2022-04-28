@@ -23,6 +23,20 @@ data <- read.csv("cryptosup.csv")
 
 
 
+# Introduction
+
+In this paper I will analyze Crypto currencies, and for that I choose 6 different coins which are Bitcoin, Ethereum, Cardano, and Waves, this choice of coins was mostly due to the data available as the Crypto market is new and so are some of the coins, also, I made sure to have balance between a few more established coins such as Bitcoin and Ethereum while the others are still new and have not yet fully been established.I got the data from Yahoo Finance, and it includes a range from 221 to 385 weekly observations depending on the coin, for my project I intend to use closing price of the week, however, the data also included opening, high and low price of the week and volume of trades for the week. Daily data was also available, however, cryptocurrencies are extremely volatile which caused daily data to be quite noisy, which is why I choose weekly data despite lowering the number of observations.
+
+
+# Vector Error Correction Model
+
+Bitcoin is the oldest and most dominant cryptocurrency its price is almost 3 times the price of its closest competitor Ethereum, for many it is considered as "digital gold" and a lot of the cheaper currencies can only be purchased with Bitcoin, therefore, its very likely that the movements in Bitcoin price are likely to be very impactful throughout the cryptocurrency market as a lot of the thrust in the cryptocurrency market has been due to Bitcoin's success, however, it is quite unlikely that movements on Cardano which costs a fraction of the Price of Bitcoin have any impact whatsoever on its price. Therefore, for my VECM model I have decided to use 3 equations 
+
+
+
+
+
+
 
 ```{r,echo=FALSE}
 
@@ -41,7 +55,7 @@ datadif$Date <- as.Date(data$Date)
 data1 <- datadif[2:215,6:9]
 var1 <- VAR(data1,p=15,type = 'const')
 data2 <- datadif[2:215,2:5]
-vecm<-VECM(data.frame(waves=log(data2[,4]),cardano=log(data2[,2]),eth=log(data2[,3]),btc=log(data2[,1])), lag=20, estim="ML",r=3)
+vecm<-VECM(data.frame(waves=log(data2[,4]),cardano=log(data2[,2]),eth=log(data2[,3]),btc=log(data2[,1])), lag=25, estim="ML",r=3)
 
 rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA,"VECM_RMSE"=NA)
 colors<- c("Forecast"="red","Data"="black")
@@ -78,7 +92,7 @@ rmvar
 ```
 
 ```{r}
-mse <- mean(vecm$residuals[,1]^2)
+mse <- mean(vecm$residuals[,4]^2)
 
 rmvecm <- sqrt(mse)
 
