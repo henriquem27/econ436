@@ -9,7 +9,9 @@ output: html_document
 library(OpenImageR)
 library(dplyr)
 library(ggbiplot)
-
+library(dplyr)
+library(MASS)
+library(klaR)
 ```
 
 
@@ -17,7 +19,7 @@ library(ggbiplot)
 ```{r}
 
 
-path="C:/Users/henri/Documents/stat460/Training/glioma_tumor"
+path="C:/Users/henri/econ436/Training/glioma_tumor"
 
 setwd(path)
 Files <- list.files()
@@ -36,7 +38,7 @@ for(i in seq_along(Files)){
 ```{r}
 
 
-path="C:/Users/henri/Documents/stat460/Training/no_tumor"
+path="C:/Users/henri/econ436/Training/no_tumor"
 
 setwd(path)
 Files <- list.files()
@@ -59,7 +61,19 @@ for(i in seq_along(Files)){
 ```{r}
 pca<-prcomp(Results[[1]])
 
-mma<-as.matrix(cbind(pca$x[,1:100]))
+compressed.img1 <- pca$x[,20:200] %*% t(pca$rotation[,20:200])
+compressed.img2 <- pca$x[,1:20] %*% t(pca$rotation[,1:20])
+ 
+
+```
+
+
+```{r}
+pca<-prcomp(Results2[[200]])
+
+compressed.img3 <- pca$x[,1:20] %*% t(pca$rotation[,1:20])
+compressed.img4 <- pca$x[,20:200] %*% t(pca$rotation[,20:200])
+ 
 
 ```
 
@@ -79,6 +93,10 @@ df[i,]<-row
 }
 
 ```
+
+
+
+
 
 
 
@@ -102,9 +120,9 @@ df2[i,]<-row
 ```{r}
 
 df<-df %>%
-  mutate(cancer="Has Tumor")
+  mutate(cancer=2)
 
-df2 <-df2 %>% mutate(cancer="No Tumor")
+df2 <-df2 %>% mutate(cancer=1)
 
 data <-rbind(df,df2)
 
@@ -132,7 +150,7 @@ ggbiplot(pca2,groups = as.factor(data$cancer),var.axes = F)
 
 
 ```{r}
-clust <- hclust(dist(data[,1:200]))
+clust <- hclust(dist(data[,1:2]))
 
 plot(clust)
 ```
@@ -143,7 +161,30 @@ plot(clust)
 ```{r}
 cutree <- cutree(clust,k=2)
 
+table(true=as.factor(data$cancer),pred=as.factor(cutree))
+
 ```
+
+
+
+```{r}
+lda <-partimat(as.factor(cancer) ~ X2+X1, data = data,method="lda")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

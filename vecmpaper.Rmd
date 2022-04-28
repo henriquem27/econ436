@@ -30,7 +30,9 @@ In this paper I will analyze Crypto currencies, and for that I choose 6 differen
 
 # Vector Error Correction Model
 
-Bitcoin is the oldest and most dominant cryptocurrency its price is almost 3 times the price of its closest competitor Ethereum, for many it is considered as "digital gold" and a lot of the cheaper currencies can only be purchased with Bitcoin, therefore, its very likely that the movements in Bitcoin price are likely to be very impactful throughout the cryptocurrency market as a lot of the thrust in the cryptocurrency market has been due to Bitcoin's success, however, it is quite unlikely that movements on Cardano which costs a fraction of the Price of Bitcoin have any impact whatsoever on its price. Therefore, for my VECM model I have decided to use 3 equations 
+Bitcoin is the oldest and most dominant cryptocurrency its price is almost 3 times the price of its closest competitor Ethereum, for many it is considered as "digital gold" and a lot of the cheaper currencies can only be purchased with Bitcoin, therefore, its very likely that the movements in Bitcoin price are likely to be very impactful throughout the cryptocurrency market as a lot of the thrust in the cryptocurrency market has been due to Bitcoin's success, however, it is quite unlikely that movements on Cardano which costs a fraction of the Price of Bitcoin have any impact whatsoever on its price.
+
+Due to the characteristics of the cryptocurrency market discussed above, I decided to estima the model 
 
 
 
