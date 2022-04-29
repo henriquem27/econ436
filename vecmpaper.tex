@@ -1,0 +1,421 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{VECMPAPER}
+\author{}
+\date{\vspace{-2.5em}}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={VECMPAPER},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+In this paper I will analyze Crypto currencies, and for that I choose 6
+different coins which are Bitcoin, Ethereum, Cardano, and Waves, this
+choice of coins was mostly due to the data available as the Crypto
+market is new and so are some of the coins, also, I made sure to have
+balance between a few more established coins such as Bitcoin and
+Ethereum while the others are still new and have not yet fully been
+established.I got the data from Yahoo Finance, and it includes a range
+from 221 to 385 weekly observations depending on the coin, for my
+project I intend to use closing price of the week, however, the data
+also included opening, high and low price of the week and volume of
+trades for the week. Daily data was also available, however,
+cryptocurrencies are extremely volatile which caused daily data to be
+quite noisy, which is why I choose weekly data despite lowering the
+number of observations.For the periods, I selected to remove the last 10
+weeks and estimate the models on the rest of the data which is from
+2017-11-06 to 2022-01-10.
+
+\hypertarget{vector-error-correction-model}{%
+\section{Vector Error Correction
+Model}\label{vector-error-correction-model}}
+
+Bitcoin is the oldest and most dominant cryptocurrency its price is
+almost 3 times the price of its closest competitor Ethereum, for many it
+is considered as ``digital gold'' and a lot of the cheaper currencies
+can only be purchased with Bitcoin, therefore, its very likely that the
+movements in Bitcoin price are likely to be very impactful throughout
+the cryptocurrency market as a lot of the thrust in the cryptocurrency
+market has been due to Bitcoin's success, however, it is quite unlikely
+that movements on Cardano which costs a fraction of the Price of Bitcoin
+have any impact whatsoever on its price.
+
+Due to the characteristics of the cryptocurrency market discussed above,
+I decided to estimate the VECM of lag 25 with 3 ranks where Cardano,
+Ethereum and Waves all depend only on Bitcoin, from that we get the
+following equations:
+
+\(Equation 1 : Log(Cardano)_t-{2.0178}*Log(Bitcoin)_t=e_t\) (0.20963)
+\(Equation 2 : Log(Ethereum)_t-{1.6277}*Log(Bitcoin)_t=u_t\) (0.15864)
+\(Equation 3 : Log(Waves)_t-{1.8296}*Log(Bitcoin)_t=v_t\) (0.29532)
+
+As we can see by the-negative Bitcoin coefficients in all equations, we
+have positive relationships, for example if Bitcoin price increases
+Cardano prices also have to increase in order for the equation return to
+equilibrium. This relationship was what was expected since as previously
+mentioned Bitcoin is the driving force of the crypto market and
+therefore, if its price goes up it is highly likely that the other
+cryptocurrencies will follow and if it's price goes down it is also
+likely that the other cryptocurrencies prices will go down, which is
+also what the VECM model predicted. In terms of the speeds of adjustment
+only Cardano clears the vectors with an EC1 estimate of −0.362121 and
+significant p-value of less then 0.005, which means that Cardano will
+move to clear the vector when there is variation between the 2 series.
+
+\hypertarget{var-lag-selection}{%
+\section{VAR Lag Selection}\label{var-lag-selection}}
+
+For the VAR lags I decided to use 15, as from the previous paper and
+Testing on the new period it seems to be the lag with the lowest root
+mean squared error. I also tried to estimate the using the same lag as
+the VECM ,however, it did not lower the RMSE therefore, I have decided
+to stay with 15 lags for the VAR.
+
+\hypertarget{bitcoin}{%
+\section{Bitcoin}\label{bitcoin}}
+
+\hypertarget{arma015}{%
+\subsection{ARMA(0,15)}\label{arma015}}
+
+The MA 15 process was choosen based on the first paper and the lowest
+RMSE for this period, while also making the error are white noise in the
+ACF.
+
+\begin{verbatim}
+## [1] "ARMA RMSE: 0.110146446508882"
+\end{verbatim}
+
+\hypertarget{var}{%
+\subsection{VAR}\label{var}}
+
+\begin{verbatim}
+## [1] "VAR RMSE: 0.0811068177570365"
+\end{verbatim}
+
+\hypertarget{vecm}{%
+\subsection{VECM}\label{vecm}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mse }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(vecm}\SpecialCharTok{$}\NormalTok{residuals[,}\DecValTok{4}\NormalTok{]}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{rmvecm }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(mse)}
+
+\FunctionTok{paste}\NormalTok{(}\StringTok{"VECM RMSE:"}\NormalTok{,rmvecm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "VECM RMSE: 0.0681983325531644"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred}\OtherTok{\textless{}{-}}\FunctionTok{predict}\NormalTok{(vecm,}\AttributeTok{n.ahead =} \DecValTok{10}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date),}\AttributeTok{y=}\FunctionTok{log}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Bitcoin)),}\AttributeTok{group=}\DecValTok{1}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date[}\DecValTok{220}\SpecialCharTok{:}\DecValTok{229}\NormalTok{]),}\AttributeTok{y=}\NormalTok{pred[,}\DecValTok{4}\NormalTok{]),}\AttributeTok{group=}\DecValTok{1}\NormalTok{,}\AttributeTok{color=}\StringTok{"red"}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"VECM Forecast For Bitcoin"}\NormalTok{,}\AttributeTok{x=}\StringTok{"Date"}\NormalTok{,}\AttributeTok{y=}\StringTok{"Log of Price"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{vecmpaper_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+For Bitcoin we can see that the VECM does a lot better in terms of the
+RMSE being 0.02 lower than the VAR and 0.05 lower the the Univariate
+approach with MA15, the forecast seem to capture the movement of
+somewhat well as despite getting the first week and last week wrong it
+does quite well on the other weeks successfully capturing the up and
+down trend of the series.
+
+\hypertarget{ethereum}{%
+\section{Ethereum}\label{ethereum}}
+
+\hypertarget{arma017}{%
+\subsection{ARMA(0,17)}\label{arma017}}
+
+The MA 17 process was choosen based on the first paper and the lowest
+RMSE for this period, while also making the error are white noise in the
+ACF.
+
+\begin{verbatim}
+## [1] "ARMA RMSE: 0.14230004508759"
+\end{verbatim}
+
+\hypertarget{var-1}{%
+\subsection{VAR}\label{var-1}}
+
+\begin{verbatim}
+## [1] "VAR RMSE: 0.108871417792549"
+\end{verbatim}
+
+\hypertarget{vecm-1}{%
+\subsection{VECM}\label{vecm-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mse }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(vecm}\SpecialCharTok{$}\NormalTok{residuals[,}\DecValTok{3}\NormalTok{]}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{rmvecm }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(mse)}
+
+\FunctionTok{paste}\NormalTok{(}\StringTok{"VECM RMSE:"}\NormalTok{,rmvecm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "VECM RMSE: 0.0856005276682794"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred}\OtherTok{\textless{}{-}}\FunctionTok{predict}\NormalTok{(vecm,}\AttributeTok{n.ahead =} \DecValTok{10}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date),}\AttributeTok{y=}\FunctionTok{log}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Ethereum)),}\AttributeTok{group=}\DecValTok{1}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date[}\DecValTok{220}\SpecialCharTok{:}\DecValTok{229}\NormalTok{]),}\AttributeTok{y=}\NormalTok{pred[,}\DecValTok{3}\NormalTok{]),}\AttributeTok{group=}\DecValTok{1}\NormalTok{,}\AttributeTok{color=}\StringTok{"red"}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"VECM Forecast For Ethereum"}\NormalTok{,}\AttributeTok{x=}\StringTok{"Date"}\NormalTok{,}\AttributeTok{y=}\StringTok{"Log of Price"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{vecmpaper_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+In the case of Ethereum VECM is still much better in terms of the RMSE
+when compared to the Univariate approach and the VAR, for the forecast
+it seems that the VECM captures the trend very well up until the last
+week where it predicts a downward trend whereas the actual data is a
+upward trend.
+
+\hypertarget{cardano}{%
+\section{Cardano}\label{cardano}}
+
+\hypertarget{arma09}{%
+\subsection{ARMA(0,9)}\label{arma09}}
+
+The MA 9 process was choosen based on the first paper and the lowest
+RMSE for this period, while also making the error are white noise in the
+ACF.
+
+\begin{verbatim}
+## [1] "ARMA RMSE: 0.202436044348384"
+\end{verbatim}
+
+\hypertarget{var-2}{%
+\subsection{VAR}\label{var-2}}
+
+\begin{verbatim}
+## [1] "VAR RMSE: 0.127080566668958"
+\end{verbatim}
+
+\hypertarget{vecm-2}{%
+\subsection{VECM}\label{vecm-2}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mse }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(vecm}\SpecialCharTok{$}\NormalTok{residuals[,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{rmvecm }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(mse)}
+
+\FunctionTok{paste}\NormalTok{(}\StringTok{"VECM RMSE:"}\NormalTok{,rmvecm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "VECM RMSE: 0.0967846740423259"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred}\OtherTok{\textless{}{-}}\FunctionTok{predict}\NormalTok{(vecm,}\AttributeTok{n.ahead =} \DecValTok{10}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date),}\AttributeTok{y=}\FunctionTok{log}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Cardano)),}\AttributeTok{group=}\DecValTok{1}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date[}\DecValTok{220}\SpecialCharTok{:}\DecValTok{229}\NormalTok{]),}\AttributeTok{y=}\NormalTok{pred[,}\DecValTok{2}\NormalTok{]),}\AttributeTok{group=}\DecValTok{1}\NormalTok{,}\AttributeTok{color=}\StringTok{"red"}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"VECM Forecast For Cardano"}\NormalTok{,}\AttributeTok{x=}\StringTok{"Date"}\NormalTok{,}\AttributeTok{y=}\StringTok{"Log of Price"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{vecmpaper_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+For Cardano we have quite a large difference, between the Univariate
+model RMSE (0.20) and the other models VAR (0.12) and VECM (0.09) RMSE,
+with VECM also performing the best for Cardano. For the VECM, the
+forecast does not do very well as it misses most of the downward trend
+in the first few weeks.
+
+\hypertarget{waves}{%
+\section{Waves}\label{waves}}
+
+\hypertarget{arma017-1}{%
+\subsection{ARMA(0,17)}\label{arma017-1}}
+
+The MA 17 process was choosen based on the first paper and the lowest
+RMSE for this period, while also making the error are white noise in the
+ACF.
+
+\begin{verbatim}
+## [1] "ARMA RMSE: 0.171533674791841"
+\end{verbatim}
+
+\hypertarget{var-3}{%
+\subsection{VAR}\label{var-3}}
+
+\begin{verbatim}
+## [1] "VAR RMSE: 0.131526318599454"
+\end{verbatim}
+
+\hypertarget{vecm-3}{%
+\subsection{VECM}\label{vecm-3}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mse }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(vecm}\SpecialCharTok{$}\NormalTok{residuals[,}\DecValTok{1}\NormalTok{]}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{rmvecm }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(mse)}
+
+\FunctionTok{paste}\NormalTok{(}\StringTok{"VECM RMSE:"}\NormalTok{,rmvecm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "VECM RMSE: 0.104218786843637"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred}\OtherTok{\textless{}{-}}\FunctionTok{predict}\NormalTok{(vecm,}\AttributeTok{n.ahead =} \DecValTok{10}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date),}\AttributeTok{y=}\FunctionTok{log}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Waves)),}\AttributeTok{group=}\DecValTok{1}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{as.Date}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Date[}\DecValTok{220}\SpecialCharTok{:}\DecValTok{229}\NormalTok{]),}\AttributeTok{y=}\NormalTok{pred[,}\DecValTok{1}\NormalTok{]),}\AttributeTok{group=}\DecValTok{1}\NormalTok{,}\AttributeTok{color=}\StringTok{"red"}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"VECM Forecast For Waves"}\NormalTok{,}\AttributeTok{x=}\StringTok{"Date"}\NormalTok{,}\AttributeTok{y=}\StringTok{"Log of Price"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{vecmpaper_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+Continuing the trend in terms of RMSE, VECM does the best for Waves with
+the univariate approach being the worst, with VAR in the middle but
+still better than the univariate. Despite the low RMSE, the VECM model
+completely misses the upward trend in the forecast by quite a lot, as it
+seems that waves is bouncing back from a big downturn which the vecm
+struggles to capture.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+\begin{longtable}[]{@{}rlll@{}}
+\toprule
+Variables & ARMA RMSE & VAR RMSE & VECM RMSE \\
+\midrule
+\endhead
+BITCOIN & 0.110146446508882 & 0.08110681775703654 &
+0.0681983325531644 \\
+Ethereum & 0.14230004508759 & 0.108871417792549 & 0.0856005276682794 \\
+Cardano & 0.202436044348384 & 0.127080566668958 & 0.0967846740423259 \\
+Waves & 0.171533674791841 & 0.131526318599454 & 0.104218786843637 \\
+\bottomrule
+\end{longtable}
+
+\end{document}

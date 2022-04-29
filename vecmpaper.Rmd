@@ -1,8 +1,11 @@
 ---
-title: "VECMPAPER"
+title: "Forcasting The Crypto Market"
+author: "Henrique Magalhaes Rio"
+date: "4/29/2022"
 output:
-  pdf_document: default
+  word_document: default
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -25,20 +28,30 @@ data <- read.csv("cryptosup.csv")
 
 # Introduction
 
-In this paper I will analyze Crypto currencies, and for that I choose 6 different coins which are Bitcoin, Ethereum, Cardano, and Waves, this choice of coins was mostly due to the data available as the Crypto market is new and so are some of the coins, also, I made sure to have balance between a few more established coins such as Bitcoin and Ethereum while the others are still new and have not yet fully been established.I got the data from Yahoo Finance, and it includes a range from 221 to 385 weekly observations depending on the coin, for my project I intend to use closing price of the week, however, the data also included opening, high and low price of the week and volume of trades for the week. Daily data was also available, however, cryptocurrencies are extremely volatile which caused daily data to be quite noisy, which is why I choose weekly data despite lowering the number of observations.
+In this paper I will analyze Cryptocurrencies, and for that I choose 6 different coins which are Bitcoin, Ethereum, Cardano, and Waves, this choice of coins was mostly due to the data available as the Crypto market is new and so are some of the coins, also, I made sure to have balance between a few more established coins such as Bitcoin and Ethereum while the others are still new and have not yet fully been established.I got the data from Yahoo Finance, and it includes a range from 221 to 385 weekly observations depending on the coin, for my project I intend to use closing price of the week, however, the data also included opening, high and low price of the week and volume of trades for the week. Daily data was also available, however, cryptocurrencies are extremely volatile which caused daily data to be quite noisy, which is why I choose weekly data despite lowering the number of observations.For the periods, I selected to remove the last 10 weeks and estimate the models on the rest of the data which is from 2017-11-06
+to 2022-01-10.
 
 
 # Vector Error Correction Model
 
 Bitcoin is the oldest and most dominant cryptocurrency its price is almost 3 times the price of its closest competitor Ethereum, for many it is considered as "digital gold" and a lot of the cheaper currencies can only be purchased with Bitcoin, therefore, its very likely that the movements in Bitcoin price are likely to be very impactful throughout the cryptocurrency market as a lot of the thrust in the cryptocurrency market has been due to Bitcoin's success, however, it is quite unlikely that movements on Cardano which costs a fraction of the Price of Bitcoin have any impact whatsoever on its price.
 
-Due to the characteristics of the cryptocurrency market discussed above, I decided to estima the model 
+Due to the characteristics of the cryptocurrency market discussed above, I decided to estimate the VECM of lag 25 with 3 ranks where Cardano, Ethereum and Waves all depend only on Bitcoin, from that we get the following equations:
 
 
+$Equation 1 : Log(Cardano)_t-{2.0178}*Log(Bitcoin)_t=e_t$
+                            (0.20963)
+$Equation 2 : Log(Ethereum)_t-{1.6277}*Log(Bitcoin)_t=u_t$
+                             (0.15864)
+$Equation 3 : Log(Waves)_t-{1.8296}*Log(Bitcoin)_t=v_t$
+                             (0.29532)
+
+As we can see by the-negative Bitcoin coefficients in all equations, we have positive relationships, for example if Bitcoin price increases Cardano prices also have to increase in order for the equation return to equilibrium. This relationship was what was expected since as previously mentioned Bitcoin is the driving force of the crypto market and therefore, if its price goes up it is highly likely that the other cryptocurrencies will follow and if it's price goes down it is also likely that the other cryptocurrencies prices will go down, which is also what the VECM model predicted. In terms of the speeds of adjustment only Cardano clears the vectors with an EC1 estimate of −0.362121 and significant p-value of less then 0.005, which means that Cardano will move to clear the vector when there is variation between the 2 series.
 
 
+# VAR Lag Selection
 
-
+For the VAR lags I decided to use 15, as from the previous paper and Testing on the new period it seems to be the lag with the lowest root mean squared error. I also tried to estimate the using the same lag as the VECM ,however, it did not lower the RMSE therefore, I have decided to stay with 15 lags for the VAR.
 
 ```{r,echo=FALSE}
 
@@ -54,9 +67,9 @@ datadif <-datadif  %>% mutate(difwave = log(data$Waves) - log(lag(data$Waves)))
 datadif <-datadif  %>% mutate(difeth = log(data$Ethereum) - log(lag(data$Ethereum)))
 
 datadif$Date <- as.Date(data$Date)
-data1 <- datadif[2:215,6:9]
+data1 <- datadif[2:220,6:9]
 var1 <- VAR(data1,p=15,type = 'const')
-data2 <- datadif[2:215,2:5]
+data2 <- datadif[2:220,2:5]
 vecm<-VECM(data.frame(waves=log(data2[,4]),cardano=log(data2[,2]),eth=log(data2[,3]),btc=log(data2[,1])), lag=25, estim="ML",r=3)
 
 rmses <- data.frame("ARMA_RMSE"=NA,"VAR_RMSE"=NA,"VECM_RMSE"=NA)
@@ -65,19 +78,28 @@ colors<- c("Forecast"="red","Data"="black")
 
 
 
-#Bitcoin
 
+
+
+
+# Bitcoin
+
+
+## ARMA(0,15)
+
+The MA 15 process was choosen based on the first paper and the lowest RMSE for this period, while also making the error are white noise in the ACF.
 
 ```{r,echo=FALSE,fig.width=10,fig.height=7}
-fit <- Arima(data1$difbtc,order=c(0,0,11))
+fit <- Arima(data1$difbtc,order=c(0,0,15))
 rmsear<-accuracy(fit)
 
 fore <- forecast(fit,h=11)
 
-rmsear
+paste("ARMA RMSE:",rmsear[,2])
 
 ```
 
+## VAR
 
 ```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
 pred <- predict(var1,ahead=10)
@@ -86,26 +108,215 @@ fore <- pred$fcst
 mse <- mean(residuals(var1)[,1]^2)
 
 rmvar <- sqrt(mse)
-rmvar
+paste("VAR RMSE:",rmvar)
 
 #ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif)+
  # scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[221:230,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[221:230,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
 
 ```
 
-```{r}
+## VECM
+
+```{r,echo=FALSE}
 mse <- mean(vecm$residuals[,4]^2)
 
 rmvecm <- sqrt(mse)
 
-rmvecm
+paste("VECM RMSE:",rmvecm)
 
 
+pred<-predict(vecm,n.ahead = 10)
 
+ggplot()+geom_line(aes(x=as.Date(data$Date),y=log(data$Bitcoin)),group=1)+geom_line(aes(x=as.Date(data$Date[220:229]),y=pred[,4]),group=1,color="red")+labs(title="VECM Forecast For Bitcoin",x="Date",y="Log of Price")
+  
 
 
 ```
 
+For Bitcoin we can see that the VECM does a lot better in terms of the RMSE being 0.02 lower than the VAR and 0.05 lower the the Univariate approach with MA15, the forecast seem to capture the movement of somewhat well as despite getting the first week and last week wrong it does quite well on the other weeks successfully capturing the up and down trend of the series.
+
+# Ethereum
+
+
+## ARMA(0,17)
+
+The MA 17 process was choosen based on the first paper and the lowest RMSE for this period, while also making the error are white noise in the ACF.
+
+```{r,echo=FALSE,fig.width=10,fig.height=7}
+fit <- Arima(data1$difeth,order=c(0,0,17))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+paste("ARMA RMSE:",rmsear[,2])
+
+```
+
+## VAR
+
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,4]^2)
+
+rmvar <- sqrt(mse)
+paste("VAR RMSE:",rmvar)
+
+#ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif)+
+ # scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[221:230,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[221:230,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+
+```
+
+## VECM
+
+```{r,echo=FALSE}
+mse <- mean(vecm$residuals[,3]^2)
+
+rmvecm <- sqrt(mse)
+
+paste("VECM RMSE:",rmvecm)
+
+
+pred<-predict(vecm,n.ahead = 10)
+
+ggplot()+geom_line(aes(x=as.Date(data$Date),y=log(data$Ethereum)),group=1)+geom_line(aes(x=as.Date(data$Date[220:229]),y=pred[,3]),group=1,color="red")+labs(title="VECM Forecast For Ethereum",x="Date",y="Log of Price")
+  
+
+
+```
+
+
+In the case of Ethereum VECM is still much better in terms of the RMSE when compared to the Univariate approach and the VAR, for the forecast it seems that the VECM captures the trend very well up until the last week where it predicts a downward trend whereas the actual data is a upward trend.
+
+
+
+
+
+
+# Cardano
+
+
+## ARMA(0,9)
+
+The MA 9 process was choosen based on the first paper and the lowest RMSE for this period, while also making the error are white noise in the ACF.
+
+```{r,echo=FALSE,fig.width=10,fig.height=7}
+fit <- Arima(data1$difada,order=c(0,0,9))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+paste("ARMA RMSE:",rmsear[,2])
+
+```
+
+## VAR
+
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,2]^2)
+
+rmvar <- sqrt(mse)
+paste("VAR RMSE:",rmvar)
+
+#ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif)+
+ # scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[221:230,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[221:230,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+
+```
+
+## VECM
+
+```{r,echo=FALSE}
+mse <- mean(vecm$residuals[,2]^2)
+
+rmvecm <- sqrt(mse)
+
+paste("VECM RMSE:",rmvecm)
+
+
+pred<-predict(vecm,n.ahead = 10)
+
+ggplot()+geom_line(aes(x=as.Date(data$Date),y=log(data$Cardano)),group=1)+geom_line(aes(x=as.Date(data$Date[220:229]),y=pred[,2]),group=1,color="red")+labs(title="VECM Forecast For Cardano",x="Date",y="Log of Price")
+  
+
+
+```
+
+For Cardano we have quite a large difference, between the Univariate model RMSE (0.20) and the other models VAR (0.12) and VECM (0.09) RMSE, with VECM also performing the best for Cardano. For the VECM, the forecast does not do very well as it misses most of the downward trend in the first few weeks.
+
+
+
+# Waves
+
+
+## ARMA(0,17)
+
+The MA 17 process was choosen based on the first paper and the lowest RMSE for this period, while also making the error are white noise in the ACF.
+
+```{r,echo=FALSE,fig.width=10,fig.height=7}
+fit <- Arima(data1$difwave,order=c(0,0,17))
+rmsear<-accuracy(fit)
+
+fore <- forecast(fit,h=11)
+
+paste("ARMA RMSE:",rmsear[,2])
+
+```
+
+## VAR
+
+```{r warning=FALSE,echo=FALSE,fig.width=10,fig.height=7}
+pred <- predict(var1,ahead=10)
+
+fore <- pred$fcst
+mse <- mean(residuals(var1)[,3]^2)
+
+rmvar <- sqrt(mse)
+paste("VAR RMSE:",rmvar)
+
+#ggplot()+geom_line(aes(x=as.Date(Date),y=difbtc,color="Data"),data = datadif)+
+ # scale_x_date(date_labels = "%m-%Y",breaks = scales::pretty_breaks(n = 15))+geom_line(aes(x=as.Date(data[221:230,]$Date),y=fore$difbtc[,1],color='Forecast'),size=0.8,alpha=0.94)+labs(title="VAR forecasts for Bitcoin Period 1",x="Date",subtitle = "RMSE=0.0500",color="Legend",y="Percentage Change")+geom_ribbon(aes(x=as.Date(data[221:230,]$Date),ymax=fore$difbtc[,3],ymin=fore$difbtc[,2]),fill='cyan',alpha=0.3)+scale_color_manual(values=colors)
+
+```
+
+## VECM
+
+```{r,echo=FALSE}
+mse <- mean(vecm$residuals[,1]^2)
+
+rmvecm <- sqrt(mse)
+
+paste("VECM RMSE:",rmvecm)
+
+
+pred<-predict(vecm,n.ahead = 10)
+
+ggplot()+geom_line(aes(x=as.Date(data$Date),y=log(data$Waves)),group=1)+geom_line(aes(x=as.Date(data$Date[220:229]),y=pred[,1]),group=1,color="red")+labs(title="VECM Forecast For Waves",x="Date",y="Log of Price")
+  
+
+
+```
+
+
+Continuing the trend in terms of RMSE, VECM does the best for Waves with the univariate approach being the worst, with VAR in the middle but still better than the univariate. Despite the low RMSE, the VECM model completely misses the upward trend in the forecast by quite a lot, as it seems that waves is bouncing back from a big downturn which the VECM struggles to capture.
+
+
+
+# Conclusion
+
+| Variables | ARMA RMSE | VAR RMSE | VECM RMSE  |
+|-----------:|:---------|---------|----------|
+|   Bitcoin  |  0.110146446508882  |    0.08110681775703654   | 0.0681983325531644   |
+|  Ethereum |  0.14230004508759 |   0.108871417792549   | 0.0856005276682794  |
+|   Cardano |   0.202436044348384 |     0.127080566668958   | 0.0967846740423259 |
+| Waves | 0.171533674791841 | 0.131526318599454 | 0.104218786843637 |
+
+
+
+The common trend for the Crypto market seems to be the that the multivariate models do a lot better when compared to the univariate models, which suggest that the cryptocurrencies prices are tied together in their movements, also looking at the RMSE's it seems that Bitcoin does hold influence over the market as the VECM models RMSE is lower when compared to the VAR RMSE. Also, Cardano and Waves Univariate RMSE is much higher whem compared to Bitcoin and Ethereum, which seems to indicate that since they are newer coins that trade on lower price, their price is much more correlated to the crypto market when compared to a established more established cryptocurrency like Bitcoin. Moreover, Following the same logic it Bitcoin's Univariate RMSE is much closer to the Multivariate methods when compared to the other 3 cryptocurrency which further indicates that Bitcoin is the dominant cryptocurrency and therfore, its price is less correlated with the cryto market.
 
 
 
