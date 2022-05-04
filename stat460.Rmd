@@ -12,6 +12,7 @@ library(ggbiplot)
 library(dplyr)
 library(MASS)
 library(klaR)
+library(ggpubr)
 ```
 
 
@@ -61,9 +62,13 @@ for(i in seq_along(Files)){
 ```{r}
 pca<-prcomp(Results[[1]])
 
-compressed.img1 <- pca$x[,20:200] %*% t(pca$rotation[,20:200])
-compressed.img2 <- pca$x[,1:20] %*% t(pca$rotation[,1:20])
- 
+compressed.img1 <- pca$x[,50:200] %*% t(pca$rotation[,50:200])
+compressed.img2 <- pca$x[,1:50] %*% t(pca$rotation[,1:50])
+ggbiplot(pca,var.axes = F)
+var_explained = pca$sdev^2 / sum(pca$sdev^2)
+
+ggplot()+geom_line(aes(x=1:10,y=var_explained[1:10]))+scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10))+geom_point(aes(x=1:10,y=var_explained[1:10]))+labs(x="Principal Component",y="Percentage of Variance Explained",title = "Scree Plot")
+
 
 ```
 
@@ -71,8 +76,8 @@ compressed.img2 <- pca$x[,1:20] %*% t(pca$rotation[,1:20])
 ```{r}
 pca<-prcomp(Results2[[200]])
 
-compressed.img3 <- pca$x[,1:20] %*% t(pca$rotation[,1:20])
-compressed.img4 <- pca$x[,20:200] %*% t(pca$rotation[,20:200])
+compressed.img3 <- pca$x[,1:50] %*% t(pca$rotation[,1:50])
+compressed.img4 <- pca$x[,50:200] %*% t(pca$rotation[,50:200])
  
 
 ```
