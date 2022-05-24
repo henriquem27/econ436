@@ -2,7 +2,9 @@
 title: "stat460"
 author: "Henrique Magalhaes Rio"
 date: "4/18/2022"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r}
@@ -13,6 +15,8 @@ library(dplyr)
 library(MASS)
 library(klaR)
 library(ggpubr)
+library(caret)
+library(class)
 ```
 
 
@@ -54,9 +58,41 @@ for(i in seq_along(Files)){
 
 ```
 
+```{r}
 
 
+path="C:/Users/henri/econ436/Testing/glioma_tumor"
 
+setwd(path)
+Files <- list.files()
+Results3 <- list()
+for(i in seq_along(Files)){
+      Image <- readImage(Files[i])
+      Resized <- resizeImage(Image, width = 200, height = 200)
+      Gray <- rgb_2gray(Resized)
+      Results3[[i]] <- Gray
+}
+
+
+```
+
+```{r}
+
+
+path="C:/Users/henri/econ436/Testing/no_tumor"
+
+setwd(path)
+Files <- list.files()
+Results4 <- list()
+for(i in seq_along(Files)){
+      Image <- readImage(Files[i])
+      Resized <- resizeImage(Image, width = 200, height = 200)
+      Gray <- rgb_2gray(Resized)
+      Results4[[i]] <- Gray
+}
+
+
+```
 
 
 ```{r}
@@ -122,12 +158,52 @@ df2[i,]<-row
 ```
 
 
+
+```{r}
+df3 <- data.frame(matrix(ncol = 200, nrow =100))
+
+for(i in 1:100){
+
+pca<-prcomp(Results3[[i]])
+
+row <-pca$x[,1]
+
+df3[i,]<-row
+
+
+}
+
+```
+
+
+
+
+
+
+```{r}
+df4 <- data.frame(matrix(ncol = 200, nrow =100))
+
+for(i in 1:100){
+
+pca<-prcomp(Results4[[i]])
+
+row <-pca$x[,1]
+
+df4[i,]<-row
+
+
+}
+
+```
+
+
+
 ```{r}
 
 df<-df %>%
-  mutate(cancer=2)
+  mutate(cancer="Tumor")
 
-df2 <-df2 %>% mutate(cancer=1)
+df2 <-df2 %>% mutate(cancer="No Tumor")
 
 data <-rbind(df,df2)
 
@@ -140,7 +216,22 @@ pca2 <- prcomp(data[,1:200],scale. = TRUE)
 ```
 
 
+```{r}
 
+df3<-df3 %>%
+  mutate(cancer="Tumor")
+
+df4 <-df4 %>% mutate(cancer="No Tumor")
+
+testing <-rbind(df3,df4)
+
+
+pca3 <- prcomp(testing[,1:200],scale. = TRUE)
+
+
+
+
+```
 
 
 
@@ -148,7 +239,9 @@ pca2 <- prcomp(data[,1:200],scale. = TRUE)
 ggbiplot(pca2,groups = as.factor(data$cancer),var.axes = F)
 ```
 
-
+```{r}
+ggbiplot(pca3,groups = as.factor(testing$cancer),var.axes = F)
+```
 
  
 
@@ -166,7 +259,7 @@ plot(clust)
 ```{r}
 cutree <- cutree(clust,k=2)
 
-table(true=as.factor(data$cancer),pred=as.factor(cutree))
+table(cutree)
 
 ```
 
@@ -179,15 +272,48 @@ lda <-partimat(as.factor(cancer) ~ X2+X1, data = data,method="lda")
 ```
 
 
+```{r}
+logi <- glm(as.factor(cancer)~.,data=data,family="binomial")
+
+prob <- predict(logi, testing, type = "response")
+
+pred <- ifelse(prob>0.5, "Tumor", "No Tumor")
+
+
+
+confusionMatrix(as.factor(pred),as.factor(testing$cancer))
+```
 
 
 
 
 
+```{r}
+
+lda2 <- lda(as.factor(cancer)~.,data=data)
+
+predlda <- predict(lda2,newdata=testing)
+
+
+confusionMatrix(as.factor(predlda$class),as.factor(testing$cancer))
+```
+
+```{r}
+knnModel <- train(as.factor(cancer) ~., 
+                  data = data, 
+                  method = 'knn')
+
+
+```
 
 
 
 
+```{r}
+knn <-knn(train=data[,1:200],test=testing[,1:200],cl=data$cancer,k=1)
+
+confusionMatrix(as.factor(knn),as.factor(testing$cancer))
+```
 
 
 

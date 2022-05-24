@@ -313,6 +313,7 @@ Continuing the trend in terms of RMSE, VECM does the best for Waves with the uni
 |  Ethereum |  0.14230004508759 |   0.108871417792549   | 0.0856005276682794  |
 |   Cardano |   0.202436044348384 |     0.127080566668958   | 0.0967846740423259 |
 | Waves | 0.171533674791841 | 0.131526318599454 | 0.104218786843637 |
+||
 
 
 
